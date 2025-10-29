@@ -1,0 +1,97 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    --background: 141 84% 3%;
+    --foreground: 0 0% 97%;
+
+    --card: 141 40% 6%;
+    --card-foreground: 0 0% 97%;
+
+    --popover: 141 50% 4%;
+    --popover-foreground: 0 0% 97%;
+
+    --primary: 141 84% 3%;
+    --primary-foreground: 0 0% 97%;
+
+    --secondary: 141 20% 15%;
+    --secondary-foreground: 0 0% 97%;
+
+    --muted: 141 20% 10%;
+    --muted-foreground: 141 10% 60%;
+
+    --accent: 95 60% 45%;
+    --accent-foreground: 0 0% 97%;
+
+    --destructive: 0 40% 55%;
+    --destructive-foreground: 0 0% 97%;
+
+    --border: 141 20% 25%;
+    --input: 141 20% 20%;
+    --ring: 95 60% 45%;
+
+    --radius: 0.75rem;
+
+    --gradient-primary: linear-gradient(135deg, hsl(95 60% 45%) 13%, hsl(95 80% 20%) 100%);
+    --gradient-hero: linear-gradient(180deg, hsl(141 84% 3%), hsl(141 50% 5%));
+    
+    --shadow-glow: 0 0 40px hsla(95, 60%, 45%, 0.3);
+    --shadow-elevated: 0 10px 40px -10px hsla(141, 84%, 3%, 0.5);
+    
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .light {
+    --background: 0 0% 98%;
+    --foreground: 141 84% 5%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 141 84% 5%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 141 84% 5%;
+
+    --primary: 141 84% 5%;
+    --primary-foreground: 0 0% 98%;
+
+    --secondary: 141 10% 90%;
+    --secondary-foreground: 141 84% 5%;
+
+    --muted: 141 10% 95%;
+    --muted-foreground: 141 10% 40%;
+
+    --accent: 95 60% 45%;
+    --accent-foreground: 0 0% 98%;
+
+    --destructive: 0 60% 50%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 141 10% 85%;
+    --input: 141 10% 90%;
+    --ring: 95 60% 45%;
+
+    --gradient-primary: linear-gradient(135deg, hsl(95 60% 45%) 13%, hsl(95 80% 30%) 100%);
+    --gradient-hero: linear-gradient(180deg, hsl(0 0% 98%), hsl(141 10% 95%));
+    
+    --shadow-glow: 0 0 40px hsla(95, 60%, 45%, 0.2);
+    --shadow-elevated: 0 10px 40px -10px hsla(141, 20%, 20%, 0.15);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans;
+  }
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
