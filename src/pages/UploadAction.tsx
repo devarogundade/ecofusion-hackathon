@@ -31,6 +31,7 @@ import { executeTransaction } from "@/services/hashconnect";
 import useHashConnect from "@/hooks/useHashConnect";
 import { supabase } from "@/integrations/supabase/client";
 import { generateReview } from "@/services/aiService";
+import { useAuth } from "@/hooks/useAuth";
 
 const UploadAction = () => {
   const [isVerifying, setIsVerifying] = useState(false);
@@ -44,6 +45,7 @@ const UploadAction = () => {
 
   const { upload, uploadFile } = useIPFS();
   const { accountId } = useHashConnect();
+  const { user } = useAuth();
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const onImageSelect = (e: any) => {
@@ -116,7 +118,7 @@ const UploadAction = () => {
 
       await supabase.from("carbon_actions").insert({
         co2_impact: 0,
-        user_id: accountId,
+        user_id: user.id,
         verification_status: "pending",
         tokens_minted: 0,
         location,
