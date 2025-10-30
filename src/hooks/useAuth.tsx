@@ -12,15 +12,17 @@ export const useAuth = (requireAuth = true) => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
       setIsLoading(false);
-      
+
       if (requireAuth && !session) {
         navigate("/auth");
       }
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
-      
+
       if (requireAuth && !session) {
         navigate("/auth");
       }

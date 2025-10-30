@@ -4,14 +4,55 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Upload, Camera, MapPin, Calendar, Loader2, CheckCircle2 } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Upload,
+  Camera,
+  MapPin,
+  Calendar,
+  Loader2,
+  CheckCircle2,
+} from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { useIPFS } from "@/hooks/useIPFS";
+import {
+  ContractExecuteTransaction,
+  ContractFunctionParameters,
+  ContractId,
+} from "@hashgraph/sdk";
+import { executeTransaction } from "@/services/hashconnect";
+import useHashConnect from "@/hooks/useHashConnect";
+import { supabase } from "@/integrations/supabase/client";
+import { generateReview } from "@/services/aiService";
 
 const UploadAction = () => {
   const [isVerifying, setIsVerifying] = useState(false);
-  const [isVerified, setIsVerified] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
+
+  const [actionType, setActionType] = useState("");
+  const [description, setDescription] = useState("");
+  const [location, setLocation] = useState("");
+  const [file, setFile] = useState<File | null>(null);
+  const [actionDate, setActionDate] = useState("");
+
+  const { upload, uploadFile } = useIPFS();
+  const { accountId } = useHashConnect();
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const onImageSelect = (e: any) => {
+    const files: File[] = e.target.files;
+    if (files.length == 0) {
+      return setFile(null);
+    }
+    setFile(files[0]);
+  };
 
   const actionTypes = [
     { value: "recycling", label: "Recycling", co2: "15 kg/action" },
@@ -22,26 +63,93 @@ const UploadAction = () => {
     { value: "composting", label: "Composting", co2: "12 kg/month" },
   ];
 
-  const handleVerify = () => {
-    setIsVerifying(true);
-    
-    // Simulate AI verification
-    setTimeout(() => {
+  const handleVerify = async () => {
+    try {
+      setIsVerifying(true);
+
+      if (!accountId)
+        return toast.error("Go to dashboard and Connect your wallet!.");
+      if (!actionType) return toast.error("Action type must be selected!.");
+      if (!description) return toast.error("Description cannot be empty!.");
+      if (!location) return toast.error("Location cannot be empty!.");
+      if (!file) return toast.error("File must be attached!.");
+
+      const { url: fileUrl, mime_type: fileMimetype } = await uploadFile(file);
+
+      const aiReview = await generateReview(
+        JSON.stringify({
+          actionType,
+          description,
+          location,
+          fileUrl,
+          fileMimetype,
+        })
+      );
+
+      const metadataJson = JSON.stringify({
+        actionType,
+        description,
+        location,
+        aiReview,
+        fileUrl,
+        fileMimetype,
+        accountId,
+        timestampMs: Date.now(),
+      });
+      const metadataBase64 = btoa(unescape(encodeURIComponent(metadataJson)));
+
+      const { url: metadataUrl } = await upload(metadataBase64);
+
+      const tx = new ContractExecuteTransaction()
+        .setContractId(
+          ContractId.fromString(import.meta.env.VITE_ACTION_CONTRACT_ID)
+        )
+        .setFunction(
+          "submit",
+          new ContractFunctionParameters().addString(metadataUrl)
+        )
+        .setGas(5_000_000);
+
+      const txReceipt = await executeTransaction(accountId, tx);
+
+      console.log({ txId: txReceipt.scheduledTransactionId.toString() });
+
+      await supabase.from("carbon_actions").insert({
+        co2_impact: 0,
+        user_id: accountId,
+        verification_status: "pending",
+        tokens_minted: 0,
+        location,
+        action_type: actionType,
+        description,
+        action_date: actionDate,
+        proof_url: metadataUrl,
+      });
+
+      toast.success(
+        `Action verified successfully! Tokens will be minted to your wallet after review is completed.`
+      );
+
+      setIsSubmitted(true);
+    } catch (error) {
+      toast.error(error?.message);
+      setIsSubmitted(false);
+    } finally {
       setIsVerifying(false);
-      setIsVerified(true);
-      toast.success("Action verified successfully! Tokens will be minted to your wallet.");
-    }, 3000);
+    }
   };
 
   return (
     <div className="min-h-screen">
       <Navigation />
-      
+
       <div className="pt-24 pb-12 px-4">
         <div className="container mx-auto max-w-4xl space-y-8">
           {/* Header */}
           <div className="text-center">
-            <h1 className="text-4xl font-bold mb-2">Upload Sustainable Action</h1>
+            <h1 className="text-4xl font-bold mb-2">
+              Upload Sustainable Action
+            </h1>
             <p className="text-muted-foreground">
               Submit proof of your eco-friendly activities for AI verification
             </p>
@@ -56,7 +164,7 @@ const UploadAction = () => {
               <CardContent className="space-y-6">
                 <div className="space-y-2">
                   <Label htmlFor="action-type">Action Type</Label>
-                  <Select>
+                  <Select onValueChange={(value) => setActionType(value)}>
                     <SelectTrigger id="action-type">
                       <SelectValue placeholder="Select action type" />
                     </SelectTrigger>
@@ -72,9 +180,11 @@ const UploadAction = () => {
 
                 <div className="space-y-2">
                   <Label htmlFor="description">Description</Label>
-                  <Textarea 
+                  <Textarea
                     id="description"
                     placeholder="Describe your sustainable action in detail..."
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
                     rows={4}
                   />
                 </div>
@@ -84,10 +194,12 @@ const UploadAction = () => {
                     <Label htmlFor="location">Location</Label>
                     <div className="relative">
                       <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                      <Input 
+                      <Input
                         id="location"
                         placeholder="Enter location"
                         className="pl-10"
+                        value={location}
+                        onChange={(e) => setLocation(e.target.value)}
                       />
                     </div>
                   </div>
@@ -96,10 +208,12 @@ const UploadAction = () => {
                     <Label htmlFor="date">Date</Label>
                     <div className="relative">
                       <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                      <Input 
+                      <Input
                         id="date"
                         type="date"
                         className="pl-10"
+                        value={actionDate}
+                        onChange={(e) => setActionDate(e.target.value)}
                       />
                     </div>
                   </div>
@@ -119,34 +233,34 @@ const UploadAction = () => {
                         </div>
                       </div>
                       <div>
-                        <p className="font-medium mb-1">Upload photo or video proof</p>
+                        <p className="font-medium mb-1">
+                          Upload photo or video proof
+                        </p>
                         <p className="text-sm text-muted-foreground">
                           Drag and drop files or click to browse
                         </p>
                       </div>
-                      <Button variant="outline" size="sm">
-                        Choose Files
-                      </Button>
+                      <input type="file" onChange={onImageSelect} />
                     </div>
                   </div>
                 </div>
 
                 <div className="flex gap-4">
-                  <Button 
-                    variant="gradient" 
+                  <Button
+                    variant="gradient"
                     className="flex-1"
                     onClick={handleVerify}
-                    disabled={isVerifying || isVerified}
+                    disabled={isVerifying || isSubmitted}
                   >
                     {isVerifying ? (
                       <>
                         <Loader2 className="mr-2 animate-spin" />
                         Verifying with AI...
                       </>
-                    ) : isVerified ? (
+                    ) : isSubmitted ? (
                       <>
                         <CheckCircle2 className="mr-2" />
-                        Verified
+                        Submitted
                       </>
                     ) : (
                       "Submit for Verification"

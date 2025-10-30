@@ -1,11 +1,12 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Leaf, Menu, X, LogOut } from "lucide-react";
+import { Menu, X, LogOut } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useToast } from "@/hooks/use-toast";
 import type { User } from "@supabase/supabase-js";
+import logoImg from "@/assets/logo.png";
 
 const Navigation = () => {
   const location = useLocation();
@@ -19,7 +20,9 @@ const Navigation = () => {
       setUser(session?.user ?? null);
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
     });
 
@@ -45,12 +48,10 @@ const Navigation = () => {
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border">
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto px-4 py-2">
         <div className="flex items-center justify-between h-16">
           <Link to="/" className="flex items-center gap-2">
-            <div className="p-2 rounded-lg bg-gradient-primary">
-              <Leaf className="w-6 h-6" />
-            </div>
+            <img src={logoImg} className="rounded-sm w-16 h-16" />
             <span className="text-xl font-bold">EcoFusion</span>
           </Link>
 
@@ -77,7 +78,9 @@ const Navigation = () => {
               </Button>
             ) : (
               <Link to="/auth">
-                <Button variant="gradient" size="sm">Sign In</Button>
+                <Button variant="gradient" size="sm">
+                  Sign In
+                </Button>
               </Link>
             )}
           </div>
@@ -112,13 +115,20 @@ const Navigation = () => {
               <div className="flex items-center gap-2">
                 <ThemeToggle />
                 {user ? (
-                  <Button variant="ghost" size="sm" onClick={handleSignOut} className="flex-1">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleSignOut}
+                    className="flex-1"
+                  >
                     <LogOut className="w-4 h-4 mr-2" />
                     Sign Out
                   </Button>
                 ) : (
                   <Link to="/auth" className="flex-1">
-                    <Button variant="gradient" size="sm" className="w-full">Sign In</Button>
+                    <Button variant="gradient" size="sm" className="w-full">
+                      Sign In
+                    </Button>
                   </Link>
                 )}
               </div>

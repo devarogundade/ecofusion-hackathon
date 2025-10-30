@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from "react";
 import Navigation from "@/components/Navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,7 +21,14 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import { TrendingUp, TrendingDown, Search, Filter, Download, Info } from "lucide-react";
+import {
+  TrendingUp,
+  TrendingDown,
+  Search,
+  Filter,
+  Download,
+  Info,
+} from "lucide-react";
 import { LineChart, Line, ResponsiveContainer } from "recharts";
 import { useToast } from "@/hooks/use-toast";
 import { generateCertificate } from "@/utils/pdfGenerator";
@@ -59,7 +67,7 @@ const Marketplace = () => {
       total: 2856,
       change: -3.2,
       trend: "down" as const,
-      sparkline: [2.5, 2.45, 2.42, 2.40, 2.39, 2.38],
+      sparkline: [2.5, 2.45, 2.42, 2.4, 2.39, 2.38],
       co2Offset: 1.2,
       round: 2,
       certified: true,
@@ -68,11 +76,11 @@ const Marketplace = () => {
       id: 3,
       seller: "0x5A92...7E3F",
       tokens: 850,
-      price: 2.50,
+      price: 2.5,
       total: 2125,
       change: 8.7,
       trend: "up" as const,
-      sparkline: [2.3, 2.35, 2.4, 2.42, 2.48, 2.50],
+      sparkline: [2.3, 2.35, 2.4, 2.42, 2.48, 2.5],
       co2Offset: 0.85,
       round: 1,
       certified: true,
@@ -85,7 +93,7 @@ const Marketplace = () => {
       total: 726,
       change: 5.2,
       trend: "up" as const,
-      sparkline: [2.3, 2.32, 2.36, 2.38, 2.40, 2.42],
+      sparkline: [2.3, 2.32, 2.36, 2.38, 2.4, 2.42],
       co2Offset: 0.3,
       round: 2,
       certified: true,
@@ -120,11 +128,11 @@ const Marketplace = () => {
       id: 7,
       seller: "0x4C8B...2F9A",
       tokens: 1500,
-      price: 2.40,
+      price: 2.4,
       total: 3600,
       change: 2.1,
       trend: "up" as const,
-      sparkline: [2.35, 2.36, 2.37, 2.38, 2.39, 2.40],
+      sparkline: [2.35, 2.36, 2.37, 2.38, 2.39, 2.4],
       co2Offset: 1.5,
       round: 1,
       certified: true,
@@ -137,7 +145,7 @@ const Marketplace = () => {
       total: 1037,
       change: 4.8,
       trend: "up" as const,
-      sparkline: [2.3, 2.33, 2.37, 2.40, 2.42, 2.44],
+      sparkline: [2.3, 2.33, 2.37, 2.4, 2.42, 2.44],
       co2Offset: 0.43,
       round: 2,
       certified: true,
@@ -150,7 +158,7 @@ const Marketplace = () => {
       total: 2342,
       change: -2.4,
       trend: "down" as const,
-      sparkline: [2.45, 2.43, 2.42, 2.40, 2.39, 2.39],
+      sparkline: [2.45, 2.43, 2.42, 2.4, 2.39, 2.39],
       co2Offset: 0.98,
       round: 1,
       certified: true,
@@ -206,24 +214,26 @@ const Marketplace = () => {
     }
 
     const totalCost = amount * selectedListing.price;
-    
+
     // Prepare certificate data
     const certData = {
       buyerName: "Carbon Offset Buyer",
       tokensAmount: amount,
       co2Offset: (amount / 1000) * selectedListing.co2Offset,
-      transactionHash: `0x${Math.random().toString(36).substring(2, 15)}${Math.random().toString(36).substring(2, 15)}`,
+      transactionHash: `0x${Math.random()
+        .toString(36)
+        .substring(2, 15)}${Math.random().toString(36).substring(2, 15)}`,
       certificateId: `ECF-${Date.now()}-${Math.floor(Math.random() * 10000)}`,
       purchaseDate: new Date().toLocaleDateString(),
     };
-    
+
     setCertificateData(certData);
 
     toast({
       title: "Purchase successful!",
       description: `Bought ${amount} tokens for ${totalCost.toFixed(2)} HBAR`,
     });
-    
+
     setBuyDialogOpen(false);
     setBuyAmount("");
     setCertificateDialogOpen(true);
@@ -249,14 +259,17 @@ const Marketplace = () => {
   return (
     <div className="min-h-screen">
       <Navigation />
-      
+
       <div className="pt-24 pb-12 px-4">
         <div className="container mx-auto space-y-8">
           {/* Header */}
           <div>
-            <h1 className="text-4xl font-bold mb-2">Carbon Token Marketplace</h1>
+            <h1 className="text-4xl font-bold mb-2">
+              Carbon Token Marketplace
+            </h1>
             <p className="text-muted-foreground">
-              Buy and sell fractionalized carbon credits on Hedera. Receive HBAR for your tokens.
+              Buy and sell fractionalized carbon credits on Hedera. Receive HBAR
+              for your tokens.
             </p>
           </div>
 
@@ -265,7 +278,9 @@ const Marketplace = () => {
             {marketStats.map((stat, index) => (
               <Card key={index}>
                 <CardContent className="p-4">
-                  <p className="text-sm text-muted-foreground mb-1">{stat.label}</p>
+                  <p className="text-sm text-muted-foreground mb-1">
+                    {stat.label}
+                  </p>
                   <div className="flex items-end justify-between">
                     <p className="text-2xl font-bold">{stat.value}</p>
                     <span className="text-sm text-accent">{stat.change}</span>
@@ -281,8 +296,8 @@ const Marketplace = () => {
               <div className="flex flex-col md:flex-row gap-4">
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <Input 
-                    placeholder="Search by seller address..." 
+                  <Input
+                    placeholder="Search by seller address..."
                     className="pl-10"
                   />
                 </div>
@@ -302,12 +317,17 @@ const Marketplace = () => {
             <CardContent>
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {currentListings.map((listing) => (
-                  <Card key={listing.id} className="border-border hover:border-accent/50 transition-smooth">
+                  <Card
+                    key={listing.id}
+                    className="border-border hover:border-accent/50 transition-smooth"
+                  >
                     <CardContent className="p-6 space-y-4">
                       {/* Header */}
                       <div className="flex items-start justify-between">
                         <div className="flex-1 min-w-0">
-                          <p className="font-mono text-sm font-semibold truncate">{listing.seller}</p>
+                          <p className="font-mono text-sm font-semibold truncate">
+                            {listing.seller}
+                          </p>
                           <p className="text-xs text-muted-foreground mt-1">
                             {listing.tokens.toLocaleString()} tokens
                           </p>
@@ -324,11 +344,20 @@ const Marketplace = () => {
                       {/* Chart */}
                       <div className="h-16 w-full">
                         <ResponsiveContainer width="100%" height="100%">
-                          <LineChart data={listing.sparkline.map((value, i) => ({ value, index: i }))}>
-                            <Line 
-                              type="monotone" 
-                              dataKey="value" 
-                              stroke={listing.trend === "up" ? "hsl(95, 60%, 45%)" : "hsl(0, 40%, 55%)"} 
+                          <LineChart
+                            data={listing.sparkline.map((value, i) => ({
+                              value,
+                              index: i,
+                            }))}
+                          >
+                            <Line
+                              type="monotone"
+                              dataKey="value"
+                              stroke={
+                                listing.trend === "up"
+                                  ? "hsl(95, 60%, 45%)"
+                                  : "hsl(0, 40%, 55%)"
+                              }
                               strokeWidth={2}
                               dot={false}
                             />
@@ -339,41 +368,60 @@ const Marketplace = () => {
                       {/* Price Info */}
                       <div className="space-y-2">
                         <div className="flex items-baseline justify-between">
-                          <span className="text-2xl font-bold">{listing.price} HBAR</span>
-                          <Badge variant={listing.trend === "up" ? "default" : "destructive"}>
-                            {listing.change > 0 ? "+" : ""}{listing.change}%
+                          <span className="text-2xl font-bold">
+                            {listing.price} HBAR
+                          </span>
+                          <Badge
+                            variant={
+                              listing.trend === "up" ? "default" : "destructive"
+                            }
+                          >
+                            {listing.change > 0 ? "+" : ""}
+                            {listing.change}%
                           </Badge>
                         </div>
                         <div className="flex justify-between text-sm">
-                          <span className="text-muted-foreground">Total Value</span>
-                          <span className="font-semibold">{listing.total.toLocaleString()} HBAR</span>
+                          <span className="text-muted-foreground">
+                            Total Value
+                          </span>
+                          <span className="font-semibold">
+                            {listing.total.toLocaleString()} HBAR
+                          </span>
                         </div>
                         <div className="flex justify-between text-sm">
-                          <span className="text-muted-foreground">CO₂ Offset</span>
-                          <span className="font-semibold">{listing.co2Offset} tons</span>
+                          <span className="text-muted-foreground">
+                            CO₂ Offset
+                          </span>
+                          <span className="font-semibold">
+                            {listing.co2Offset} tons
+                          </span>
                         </div>
                       </div>
 
                       {/* Badges */}
                       <div className="flex gap-2">
-                        <Badge variant="outline" className="text-xs">Round {listing.round}</Badge>
+                        <Badge variant="outline" className="text-xs">
+                          Round {listing.round}
+                        </Badge>
                         {listing.certified && (
-                          <Badge variant="default" className="text-xs">VERRA</Badge>
+                          <Badge variant="default" className="text-xs">
+                            VERRA Certified
+                          </Badge>
                         )}
                       </div>
 
                       {/* Actions */}
                       <div className="flex gap-2">
-                        <Button 
-                          variant="gradient" 
-                          size="sm" 
+                        <Button
+                          variant="gradient"
+                          size="sm"
                           className="flex-1"
                           onClick={() => handleBuy(listing)}
                         >
                           Buy
                         </Button>
-                        <Button 
-                          variant="outline" 
+                        <Button
+                          variant="outline"
                           size="sm"
                           onClick={() => handleDetails(listing)}
                         >
@@ -391,26 +439,40 @@ const Marketplace = () => {
                   <Pagination>
                     <PaginationContent>
                       <PaginationItem>
-                        <PaginationPrevious 
-                          onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                          className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                        <PaginationPrevious
+                          onClick={() =>
+                            setCurrentPage((p) => Math.max(1, p - 1))
+                          }
+                          className={
+                            currentPage === 1
+                              ? "pointer-events-none opacity-50"
+                              : "cursor-pointer"
+                          }
                         />
                       </PaginationItem>
-                      {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                        <PaginationItem key={page}>
-                          <PaginationLink
-                            onClick={() => setCurrentPage(page)}
-                            isActive={currentPage === page}
-                            className="cursor-pointer"
-                          >
-                            {page}
-                          </PaginationLink>
-                        </PaginationItem>
-                      ))}
+                      {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                        (page) => (
+                          <PaginationItem key={page}>
+                            <PaginationLink
+                              onClick={() => setCurrentPage(page)}
+                              isActive={currentPage === page}
+                              className="cursor-pointer"
+                            >
+                              {page}
+                            </PaginationLink>
+                          </PaginationItem>
+                        )
+                      )}
                       <PaginationItem>
-                        <PaginationNext 
-                          onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                          className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                        <PaginationNext
+                          onClick={() =>
+                            setCurrentPage((p) => Math.min(totalPages, p + 1))
+                          }
+                          className={
+                            currentPage === totalPages
+                              ? "pointer-events-none opacity-50"
+                              : "cursor-pointer"
+                          }
                         />
                       </PaginationItem>
                     </PaginationContent>
@@ -430,9 +492,11 @@ const Marketplace = () => {
                 <div>
                   <h3 className="font-semibold mb-2">Market Information</h3>
                   <p className="text-sm text-muted-foreground">
-                    All tokens are backed by VERRA-certified carbon credits and traded on the Hedera blockchain. 
-                    Sell your fractionalized tokens to receive HBAR instantly. Transactions are secured with instant 
-                    settlement. Every token represents verified CO₂ offset with downloadable certificates.
+                    All tokens are backed by VERRA-certified carbon credits and
+                    traded on the Hedera blockchain. Sell your fractionalized
+                    tokens to receive HBAR instantly. Transactions are secured
+                    with instant settlement. Every token represents verified CO₂
+                    offset with downloadable certificates.
                   </p>
                 </div>
               </div>
@@ -455,7 +519,9 @@ const Marketplace = () => {
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
                   <p className="text-muted-foreground">Seller</p>
-                  <p className="font-mono font-semibold">{selectedListing.seller}</p>
+                  <p className="font-mono font-semibold">
+                    {selectedListing.seller}
+                  </p>
                 </div>
                 <div>
                   <p className="text-muted-foreground">Price per Token</p>
@@ -463,11 +529,15 @@ const Marketplace = () => {
                 </div>
                 <div>
                   <p className="text-muted-foreground">Available</p>
-                  <p className="font-semibold">{selectedListing.tokens.toLocaleString()} tokens</p>
+                  <p className="font-semibold">
+                    {selectedListing.tokens.toLocaleString()} tokens
+                  </p>
                 </div>
                 <div>
                   <p className="text-muted-foreground">CO₂ Offset</p>
-                  <p className="font-semibold">{selectedListing.co2Offset} tons</p>
+                  <p className="font-semibold">
+                    {selectedListing.co2Offset} tons
+                  </p>
                 </div>
               </div>
 
@@ -487,13 +557,20 @@ const Marketplace = () => {
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Total Cost</span>
                     <span className="font-bold">
-                      {(parseFloat(buyAmount) * selectedListing.price).toFixed(2)} HBAR
+                      {(parseFloat(buyAmount) * selectedListing.price).toFixed(
+                        2
+                      )}{" "}
+                      HBAR
                     </span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">CO₂ Offset</span>
                     <span className="font-semibold">
-                      {((parseFloat(buyAmount) / 1000) * selectedListing.co2Offset).toFixed(3)} tons
+                      {(
+                        (parseFloat(buyAmount) / 1000) *
+                        selectedListing.co2Offset
+                      ).toFixed(3)}{" "}
+                      tons
                     </span>
                   </div>
                   <div className="flex items-center gap-2 text-xs text-muted-foreground pt-2 border-t border-border">
@@ -504,10 +581,18 @@ const Marketplace = () => {
               )}
 
               <div className="flex gap-3">
-                <Button variant="outline" onClick={() => setBuyDialogOpen(false)} className="flex-1">
+                <Button
+                  variant="outline"
+                  onClick={() => setBuyDialogOpen(false)}
+                  className="flex-1"
+                >
                   Cancel
                 </Button>
-                <Button onClick={handleConfirmBuy} className="flex-1" variant="gradient">
+                <Button
+                  onClick={handleConfirmBuy}
+                  className="flex-1"
+                  variant="gradient"
+                >
                   Confirm Purchase
                 </Button>
               </div>
@@ -530,59 +615,100 @@ const Marketplace = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-3">
                   <div>
-                    <p className="text-xs text-muted-foreground">Seller Address</p>
-                    <p className="font-mono text-sm font-semibold">{selectedListing.seller}</p>
+                    <p className="text-xs text-muted-foreground">
+                      Seller Address
+                    </p>
+                    <p className="font-mono text-sm font-semibold">
+                      {selectedListing.seller}
+                    </p>
                   </div>
                   <div>
-                    <p className="text-xs text-muted-foreground">Price per Token</p>
-                    <p className="text-lg font-bold">{selectedListing.price} HBAR</p>
+                    <p className="text-xs text-muted-foreground">
+                      Price per Token
+                    </p>
+                    <p className="text-lg font-bold">
+                      {selectedListing.price} HBAR
+                    </p>
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">24h Change</p>
-                    <Badge variant={selectedListing.trend === "up" ? "default" : "destructive"}>
-                      {selectedListing.change > 0 ? "+" : ""}{selectedListing.change}%
+                    <Badge
+                      variant={
+                        selectedListing.trend === "up"
+                          ? "default"
+                          : "destructive"
+                      }
+                    >
+                      {selectedListing.change > 0 ? "+" : ""}
+                      {selectedListing.change}%
                     </Badge>
                   </div>
                 </div>
                 <div className="space-y-3">
                   <div>
-                    <p className="text-xs text-muted-foreground">Available Tokens</p>
-                    <p className="text-lg font-bold">{selectedListing.tokens.toLocaleString()}</p>
+                    <p className="text-xs text-muted-foreground">
+                      Available Tokens
+                    </p>
+                    <p className="text-lg font-bold">
+                      {selectedListing.tokens.toLocaleString()}
+                    </p>
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">Total Value</p>
-                    <p className="text-lg font-bold">{selectedListing.total.toLocaleString()} HBAR</p>
+                    <p className="text-lg font-bold">
+                      {selectedListing.total.toLocaleString()} HBAR
+                    </p>
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">CO₂ Offset</p>
-                    <p className="text-lg font-bold">{selectedListing.co2Offset} tons</p>
+                    <p className="text-lg font-bold">
+                      {selectedListing.co2Offset} tons
+                    </p>
                   </div>
                 </div>
               </div>
 
               <div className="pt-4 border-t border-border space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Certification Round</span>
+                  <span className="text-sm text-muted-foreground">
+                    Certification Round
+                  </span>
                   <Badge variant="outline">Round {selectedListing.round}</Badge>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Blockchain</span>
-                  <span className="text-sm font-semibold">Hedera Hashgraph</span>
+                  <span className="text-sm text-muted-foreground">
+                    Blockchain
+                  </span>
+                  <span className="text-sm font-semibold">
+                    Hedera Hashgraph
+                  </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Standard</span>
+                  <span className="text-sm text-muted-foreground">
+                    Standard
+                  </span>
                   <Badge variant="default">VERRA Certified</Badge>
                 </div>
               </div>
 
               <div className="h-24 w-full">
-                <p className="text-xs text-muted-foreground mb-2">Price History (7 days)</p>
+                <p className="text-xs text-muted-foreground mb-2">
+                  Price History (7 days)
+                </p>
                 <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={selectedListing.sparkline.map((value: number, i: number) => ({ value, index: i }))}>
-                    <Line 
-                      type="monotone" 
-                      dataKey="value" 
-                      stroke={selectedListing.trend === "up" ? "hsl(95, 60%, 45%)" : "hsl(0, 40%, 55%)"} 
+                  <LineChart
+                    data={selectedListing.sparkline.map(
+                      (value: number, i: number) => ({ value, index: i })
+                    )}
+                  >
+                    <Line
+                      type="monotone"
+                      dataKey="value"
+                      stroke={
+                        selectedListing.trend === "up"
+                          ? "hsl(95, 60%, 45%)"
+                          : "hsl(0, 40%, 55%)"
+                      }
                       strokeWidth={2}
                       dot={false}
                     />
@@ -590,7 +716,7 @@ const Marketplace = () => {
                 </ResponsiveContainer>
               </div>
 
-              <Button 
+              <Button
                 onClick={() => {
                   setDetailsDialogOpen(false);
                   handleBuy(selectedListing);
@@ -606,10 +732,15 @@ const Marketplace = () => {
       </Dialog>
 
       {/* Certificate Dialog */}
-      <Dialog open={certificateDialogOpen} onOpenChange={setCertificateDialogOpen}>
+      <Dialog
+        open={certificateDialogOpen}
+        onOpenChange={setCertificateDialogOpen}
+      >
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle className="text-2xl">🎉 Purchase Complete!</DialogTitle>
+            <DialogTitle className="text-2xl">
+              🎉 Purchase Complete!
+            </DialogTitle>
             <DialogDescription>
               Your carbon offset certificate is ready
             </DialogDescription>
@@ -619,38 +750,62 @@ const Marketplace = () => {
               {/* Certificate Preview */}
               <div className="relative p-8 rounded-lg border-2 border-accent/30 bg-gradient-to-br from-accent/5 to-accent/10">
                 <div className="absolute top-4 right-4">
-                  <Badge variant="default" className="text-xs">VERIFIED</Badge>
+                  <Badge variant="default" className="text-xs">
+                    VERIFIED
+                  </Badge>
                 </div>
-                
+
                 <div className="text-center space-y-4">
                   <div className="inline-block p-3 rounded-full bg-accent/20">
                     <Download className="w-8 h-8 text-accent" />
                   </div>
-                  
+
                   <div>
-                    <h3 className="text-xl font-bold mb-1">Carbon Offset Certificate</h3>
-                    <p className="text-sm text-muted-foreground">EcoFusion - Hedera Blockchain</p>
+                    <h3 className="text-xl font-bold mb-1">
+                      Carbon Offset Certificate
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      EcoFusion - Hedera Blockchain
+                    </p>
                   </div>
 
                   <div className="pt-4 space-y-3">
                     <div className="flex justify-between items-center p-3 rounded-lg bg-card">
-                      <span className="text-sm text-muted-foreground">Certificate ID</span>
-                      <span className="font-mono text-sm font-semibold">{certificateData.certificateId}</span>
+                      <span className="text-sm text-muted-foreground">
+                        Certificate ID
+                      </span>
+                      <span className="font-mono text-sm font-semibold">
+                        {certificateData.certificateId}
+                      </span>
                     </div>
                     <div className="flex justify-between items-center p-3 rounded-lg bg-card">
-                      <span className="text-sm text-muted-foreground">Carbon Tokens</span>
-                      <span className="font-bold">{certificateData.tokensAmount.toLocaleString()}</span>
+                      <span className="text-sm text-muted-foreground">
+                        Carbon Tokens
+                      </span>
+                      <span className="font-bold">
+                        {certificateData.tokensAmount.toLocaleString()}
+                      </span>
                     </div>
                     <div className="flex justify-between items-center p-3 rounded-lg bg-card">
-                      <span className="text-sm text-muted-foreground">CO₂ Offset</span>
-                      <span className="font-bold text-accent">{certificateData.co2Offset.toFixed(3)} tons</span>
+                      <span className="text-sm text-muted-foreground">
+                        CO₂ Offset
+                      </span>
+                      <span className="font-bold text-accent">
+                        {certificateData.co2Offset.toFixed(3)} tons
+                      </span>
                     </div>
                     <div className="flex justify-between items-center p-3 rounded-lg bg-card">
-                      <span className="text-sm text-muted-foreground">Issue Date</span>
-                      <span className="font-semibold">{certificateData.purchaseDate}</span>
+                      <span className="text-sm text-muted-foreground">
+                        Issue Date
+                      </span>
+                      <span className="font-semibold">
+                        {certificateData.purchaseDate}
+                      </span>
                     </div>
                     <div className="flex justify-between items-center p-3 rounded-lg bg-card">
-                      <span className="text-sm text-muted-foreground">Blockchain</span>
+                      <span className="text-sm text-muted-foreground">
+                        Blockchain
+                      </span>
                       <span className="font-semibold">Hedera Hashgraph</span>
                     </div>
                   </div>
@@ -659,15 +814,15 @@ const Marketplace = () => {
 
               {/* Actions */}
               <div className="flex gap-3">
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   onClick={() => setCertificateDialogOpen(false)}
                   className="flex-1"
                 >
                   Close
                 </Button>
-                <Button 
-                  variant="gradient" 
+                <Button
+                  variant="gradient"
                   onClick={handleDownloadCertificate}
                   className="flex-1"
                 >
@@ -677,7 +832,8 @@ const Marketplace = () => {
               </div>
 
               <p className="text-xs text-center text-muted-foreground">
-                This certificate represents verified carbon offset tokens on the Hedera blockchain
+                This certificate represents verified carbon offset tokens on the
+                Hedera blockchain
               </p>
             </div>
           )}
