@@ -110,7 +110,7 @@ export type Database = {
           listing_id: string | null;
           seller_id: string | null;
           total_price: number;
-          transaction_hash: string | null;
+          transaction_id: string | null;
         };
         Insert: {
           amount: number;
@@ -120,7 +120,7 @@ export type Database = {
           listing_id?: string | null;
           seller_id?: string | null;
           total_price: number;
-          transaction_hash?: string | null;
+          transaction_id?: string | null;
         };
         Update: {
           amount?: number;
@@ -130,7 +130,7 @@ export type Database = {
           listing_id?: string | null;
           seller_id?: string | null;
           total_price?: number;
-          transaction_hash?: string | null;
+          transaction_id?: string | null;
         };
         Relationships: [
           {
@@ -151,6 +151,7 @@ export type Database = {
           is_certified: boolean | null;
           round_number: number;
           start_date: string | null;
+          topic_id: string | null;
           status: string;
           target_amount: number;
         };
@@ -162,6 +163,7 @@ export type Database = {
           is_certified?: boolean | null;
           round_number: number;
           start_date?: string | null;
+          topic_id: string | null;
           status: string;
           target_amount: number;
         };
@@ -173,6 +175,7 @@ export type Database = {
           is_certified?: boolean | null;
           round_number?: number;
           start_date?: string | null;
+          topic_id: string | null;
           status?: string;
           target_amount?: number;
         };

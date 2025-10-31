@@ -17,6 +17,7 @@ type Round = {
   achieved_amount: number;
   status: "completed" | "active" | "upcoming";
   is_certified: boolean;
+  topic_id: string;
   start_date: string | null;
   end_date: string | null;
 };
@@ -174,8 +175,12 @@ const VERRAProgress = () => {
                           VERRA Certified
                         </Badge>
 
-                        <a href="" className="text-accent underline">
-                          0.0.7163937
+                        <a
+                          href={`https://hashscan.io/testnet/topic/${round.topic_id}`}
+                          target="_blank"
+                          className="text-accent underline"
+                        >
+                          {round.topic_id}
                         </a>
                       </div>
                     ) : (

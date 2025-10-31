@@ -139,8 +139,8 @@ const UploadAction = () => {
           "submit",
           new ContractFunctionParameters().addString(metadataUrl)
         )
-        .setGas(5_000_000);
-
+        .setGas(5_000_000)
+        .freezeWith(client);
       await executeTransaction(accountId, tx);
 
       const actionIdCallQuery = new ContractCallQuery()
@@ -174,7 +174,8 @@ const UploadAction = () => {
             fileMimetype,
             accountId,
           })
-        );
+        )
+        .freezeWith(client);
 
       await topicMsgTx.execute(client);
 

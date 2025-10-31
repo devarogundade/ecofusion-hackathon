@@ -22,7 +22,7 @@ const appMetadata = {
 
 export const hc = new HashConnect(
   LedgerId.fromString(env),
-  "ea885806212fff9318fe3849b17f8df5",
+  "0116653392d893148c58e7f2a3739cea",
   appMetadata,
   true
 );

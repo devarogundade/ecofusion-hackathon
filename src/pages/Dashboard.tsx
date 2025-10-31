@@ -95,13 +95,11 @@ const Dashboard = () => {
     const client = testnetClient();
     const accountInfo = await accountInfoQuery.execute(client);
 
-    console.log({ accountInfo });
-
-    const token = accountInfo?.tokens.get(
-      TokenId.fromString(import.meta.env.VITE_CARBON_CREDIT_TOKEN_ID)
+    setCarbonOffsets(
+      accountInfo?.tokens?.get(
+        TokenId.fromString(import.meta.env.VITE_CARBON_CREDIT_TOKEN_ID)
+      ) || 0
     );
-
-    setCarbonOffsets(token?.balance || 0);
   }, [accountId]);
 
   const fetchDashboardData = useCallback(async () => {
@@ -211,7 +209,7 @@ const Dashboard = () => {
     },
     {
       title: "HBAR Balance",
-      value: `${hbarBalance} ℏ`,
+      value: `${hbarBalance}`,
       change: "+8.3% this month",
       icon: TrendingUp,
       trend: "up" as const,
@@ -240,8 +238,8 @@ const Dashboard = () => {
     { month: "Oct", tokens: 0, value: 0 },
     {
       month: "Nov",
-      tokens: carbonOffsets,
-      value: hbarBalance,
+      tokens: Number(carbonOffsets),
+      value: Number(hbarBalance.replace("ℏ", "")),
     },
   ];
 
@@ -484,7 +482,7 @@ const Dashboard = () => {
                             0.0.7163937
                           </a>
                         </div>
-                        {action.verification_status !== "verified" && (
+                        {action.verification_status === "verified" && (
                           <Button
                             disabled={isClaiming}
                             onClick={() => handleRedeemAction(action.action_id)}
