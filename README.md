@@ -1,6 +1,6 @@
-[ibrahim_arogundade_certificate.pdf](https://github.com/user-attachments/files/23269967/ibrahim_arogundade_certificate.pdf)# ECOFUSION
+# ECOFUSION
 
-# React App
+## React App
 
 ## ⚙️ Installation
 
@@ -89,4 +89,5 @@ npx hardhat run scripts/deploy.ts --network testnet
 [chisom certificate.pdf](https://github.com/user-attachments/files/23269974/certificate.pdf)
 
 [ibrahim_certificate.pdf](https://github.com/user-attachments/files/23269972/ibrahim_arogundade_certificate.pdf)
+
 
