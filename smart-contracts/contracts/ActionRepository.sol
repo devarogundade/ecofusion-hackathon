@@ -22,6 +22,8 @@ contract ActionRepository is
     address public underlying;
     int64 public actionIdCounter;
 
+    int64 public latestSerialNumber;
+
     mapping(int64 => Action) public actions;
     mapping(int64 => int64) public serialToActionId;
 
@@ -100,7 +102,10 @@ contract ActionRepository is
     }
 
     /// @notice Approve a submitted action and mint tokens representing emissions saved
-    function approve(int64 actionId, int64 emissionSaved) external onlyOwner {
+    function approve(
+        int64 actionId,
+        int64 emissionSaved
+    ) external onlyOwner returns (int64) {
         Action storage act = actions[actionId];
         require(act.status == Status.Pending, "Action not pending");
 
@@ -118,12 +123,15 @@ contract ActionRepository is
             metadata
         );
         require(response == HederaResponseCodes.SUCCESS, "Mint failed");
+        latestSerialNumber = serialNumbers[0];
 
         // transfer NFT to submitter
         serialToActionId[serialNumbers[0]] = actionId;
         transferNFT(underlying, address(this), act.submitter, serialNumbers[0]);
 
         emit Approved(act.submitter, actionId);
+
+        return serialNumbers[0];
     }
 
     /// @notice Reject a submitted action and (optionally) burn corresponding tokens

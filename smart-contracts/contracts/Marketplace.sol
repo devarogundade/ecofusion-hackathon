@@ -6,7 +6,7 @@ import "./hts-precompile/HederaTokenService.sol";
 import {ICarbonCreditToken} from "./interfaces/ICarbonCreditToken.sol";
 
 contract Marketplace is HederaTokenService {
-    int64 private listingIdCounter;
+    int64 public listingIdCounter;
     ICarbonCreditToken public carbonCreditToken;
 
     struct Listing {

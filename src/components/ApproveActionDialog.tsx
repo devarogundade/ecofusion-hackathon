@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import {
+  ContractCallQuery,
   ContractExecuteTransaction,
   ContractFunctionParameters,
   ContractId,
@@ -75,13 +76,25 @@ export const ApproveActionDialog = ({
 
       await topicTx.execute(client);
 
+      const latestSerialNumberCallQuery = new ContractCallQuery()
+        .setContractId(
+          ContractId.fromString(import.meta.env.VITE_ACTION_REPOSITORY_ID)
+        )
+        .setFunction("latestSerialNumber")
+        .setGas(5_000_000);
+
+      const latestSerialNumberCall = await latestSerialNumberCallQuery.execute(
+        client
+      );
+      const latestSerialNumber = Number(latestSerialNumberCall.getUint64(0));
+
       const { error } = await supabase
         .from("carbon_actions")
         .update({
           verification_status: "verified",
           co2_impact: Number(co2Impact),
           tokens_minted: Number(tokensMinted),
-          serial_number: 0,
+          serial_number: latestSerialNumber,
         })
         .eq("id", action.id);
 

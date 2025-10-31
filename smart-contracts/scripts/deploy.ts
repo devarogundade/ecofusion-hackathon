@@ -92,8 +92,8 @@ main().catch((err) => {
 });
 
 // Deploying contracts with: 0x2531dCd3dC58559c19EEE09736443D026D40d5f5
-// ActionRepository deployed at: 0x276DD7a08268313baf6093d191DE35aC137f8Fd1
-// ActionRepository underlying: 0x00000000000000000000000000000000006d5029
-// CarbonCreditToken deployed at: 0xA7E397C152cf5f6F422436c838D933Ee88b6e1A8
-// CarbonCreditToken underlying: 0x00000000000000000000000000000000006D503B
-// Marketplace deployed at: 0xa20767fc30987Fb1C2f21aC0882b03bDC6C2de04
+// ActionRepository deployed at: 0xDA74Aea9c4564908cAdfff25085D2bCa92da88Af
+// ActionRepository underlying: 0x00000000000000000000000000000000006D6939
+// CarbonCreditToken deployed at: 0x454075cCADb9c73C0159C87e891768Dcb7c6F68F
+// CarbonCreditToken underlying: 0x00000000000000000000000000000000006D693E
+// Marketplace deployed at: 0xfC3AfC639D14d372c01C877fD1c6b43cadA7872d
