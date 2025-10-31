@@ -55,7 +55,7 @@ type CarbonAction = {
   created_at: string;
   tokens_minted: number;
   action_id: number;
-  topic_id: number;
+  topic_id: string;
 };
 
 type Profile = {
