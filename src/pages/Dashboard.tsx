@@ -58,11 +58,6 @@ type CarbonAction = {
   topic_id: string;
 };
 
-type Profile = {
-  carbon_tokens: number;
-  hbar_balance: number;
-};
-
 const Dashboard = () => {
   const { user, isLoading: authLoading } = useAuth();
   const [hbarBalance, setHbarBalance] = useState("0");

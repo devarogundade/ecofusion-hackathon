@@ -21,6 +21,7 @@ import {
 import { executeTransaction } from "@/services/hashconnect";
 import useHashConnect from "@/hooks/useHashConnect";
 import { testnetClient } from "@/services/hederaclient";
+import { ethers } from "ethers";
 
 interface ApproveActionDialogProps {
   open: boolean;
@@ -56,7 +57,7 @@ export const ApproveActionDialog = ({
           "approve",
           new ContractFunctionParameters()
             .addInt64(action.action_id)
-            .addUint64(tokensMinted)
+            .addUint64(Number(ethers.parseUnits(tokensMinted, 8)))
         )
         .setGas(5_000_000);
 
