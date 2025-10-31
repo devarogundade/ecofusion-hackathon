@@ -78,6 +78,9 @@ export type Database = {
           seller_id: string;
           status: string;
           total_price: number;
+          tokens: number;
+          seller_account_id: string;
+          listing_id: number;
           updated_at: string;
         };
         Insert: {
@@ -88,6 +91,9 @@ export type Database = {
           price_per_token: number;
           seller_id: string;
           status?: string;
+          tokens: number;
+          seller_account_id: string;
+          listing_id: number;
           total_price: number;
           updated_at?: string;
         };
@@ -99,6 +105,9 @@ export type Database = {
           price_per_token?: number;
           seller_id?: string;
           status?: string;
+          tokens?: number;
+          seller_account_id?: string;
+          listing_id?: number;
           total_price?: number;
           updated_at?: string;
         };

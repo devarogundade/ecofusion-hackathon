@@ -1,3 +1,4 @@
+/* eslint-disable no-constant-condition */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useCallback, useEffect, useState } from "react";
 import Navigation from "@/components/Navigation";
@@ -43,16 +44,18 @@ import useHashConnect from "@/hooks/useHashConnect";
 import { supabase } from "@/integrations/supabase/client";
 
 interface Listing {
-  id: number;
-  price: number;
+  co2_offset: number;
+  created_at: string;
+  expires_at: string;
+  id: string;
+  price_per_token: number;
+  seller_id: string;
+  status: string;
+  total_price: number;
+  listing_id: number;
   tokens: number;
-  co2Offset: number;
-  seller: string;
-  listingId: number;
-  trend: string;
-  sparkline: any;
-  change: number;
-  round: number;
+  seller_account_id: string;
+  updated_at: string;
 }
 
 const Marketplace = () => {
@@ -61,7 +64,6 @@ const Marketplace = () => {
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   const [certificateDialogOpen, setCertificateDialogOpen] = useState(false);
   const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
-  const [buyAmount, setBuyAmount] = useState("");
   const [certificateData, setCertificateData] = useState<any>(null);
   const { toast } = useToast();
   const { accountId } = useHashConnect();
@@ -69,7 +71,6 @@ const Marketplace = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   const itemsPerPage = 9;
-  // [2.1, 2.2, 2.15, 2.3, 2.4, 2.45]
 
   const fetchListingData = useCallback(async () => {
     if (!accountId) return;
@@ -105,60 +106,51 @@ const Marketplace = () => {
   };
 
   const handleConfirmBuy = async () => {
-    const amount = parseFloat(buyAmount);
-    if (!amount || amount <= 0) {
+    try {
+      const tx = new ContractExecuteTransaction()
+        .setContractId(
+          ContractId.fromString(import.meta.env.VITE_MARKETPLACE_ID)
+        )
+        .setPayableAmount(new Hbar(selectedListing.total_price))
+        .setFunction(
+          "buy",
+          new ContractFunctionParameters().addInt64(selectedListing.listing_id)
+        )
+        .setGas(5_000_000);
+
+      const txReceipt = await executeTransaction(accountId, tx);
+
+      // Prepare certificate data
+      const certData = {
+        buyerName: "Carbon Offset Buyer",
+        tokensAmount: selectedListing.co2_offset,
+        co2Offset: selectedListing.co2_offset,
+        transactionHash: txReceipt.scheduledTransactionId.toString(),
+        certificateId: `ECF-${Date.now()}-${Math.floor(Math.random() * 10000)}`,
+        purchaseDate: new Date().toLocaleDateString(),
+      };
+
+      setCertificateData(certData);
+
+      await supabase
+        .from("marketplace_listings")
+        .update({
+          status: "bought",
+        })
+        .eq("id", selectedListing.id);
+
       toast({
-        title: "Invalid amount",
-        description: "Please enter a valid token amount",
-        variant: "destructive",
+        title: "Purchase successful!",
+        description: `Bought ${
+          selectedListing.co2_offset
+        } tokens for ${selectedListing.total_price.toFixed(2)} HBAR`,
       });
-      return;
+
+      setBuyDialogOpen(false);
+      setCertificateDialogOpen(true);
+    } catch (error) {
+      console.log(error);
     }
-
-    if (amount > selectedListing.tokens) {
-      toast({
-        title: "Insufficient tokens",
-        description: `Only ${selectedListing.tokens} tokens available`,
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const tx = new ContractExecuteTransaction()
-      .setContractId(ContractId.fromString(import.meta.env.VITE_MARKETPLACE_ID))
-      .setPayableAmount(new Hbar(selectedListing.price))
-      .setFunction(
-        "buy",
-        new ContractFunctionParameters().addInt64(selectedListing.listingId)
-      )
-      .setGas(5_000_000);
-
-    await executeTransaction(accountId, tx);
-
-    // Prepare certificate data
-    const certData = {
-      buyerName: "Carbon Offset Buyer",
-      tokensAmount: amount,
-      co2Offset: (amount / 1000) * selectedListing.co2Offset,
-      transactionHash: `0x${Math.random()
-        .toString(36)
-        .substring(2, 15)}${Math.random().toString(36).substring(2, 15)}`,
-      certificateId: `ECF-${Date.now()}-${Math.floor(Math.random() * 10000)}`,
-      purchaseDate: new Date().toLocaleDateString(),
-    };
-
-    setCertificateData(certData);
-
-    toast({
-      title: "Purchase successful!",
-      description: `Bought ${amount} tokens for ${selectedListing.price.toFixed(
-        2
-      )} HBAR`,
-    });
-
-    setBuyDialogOpen(false);
-    setBuyAmount("");
-    setCertificateDialogOpen(true);
   };
 
   const handleDownloadCertificate = () => {
@@ -446,12 +438,14 @@ const Marketplace = () => {
                 <div>
                   <p className="text-muted-foreground">Seller</p>
                   <p className="font-mono font-semibold">
-                    {selectedListing.seller}
+                    {selectedListing.seller_account_id}
                   </p>
                 </div>
                 <div>
                   <p className="text-muted-foreground">Price per Token</p>
-                  <p className="font-semibold">{selectedListing.price} HBAR</p>
+                  <p className="font-semibold">
+                    {selectedListing.total_price} HBAR
+                  </p>
                 </div>
                 <div>
                   <p className="text-muted-foreground">Available</p>
@@ -462,49 +456,29 @@ const Marketplace = () => {
                 <div>
                   <p className="text-muted-foreground">CO₂ Offset</p>
                   <p className="font-semibold">
-                    {selectedListing.co2Offset} tons
+                    {selectedListing.co2_offset} tons
                   </p>
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Amount to Buy</label>
-                <Input
-                  type="number"
-                  placeholder="Enter token amount"
-                  value={buyAmount}
-                  onChange={(e) => setBuyAmount(e.target.value)}
-                  max={selectedListing.tokens}
-                />
-              </div>
-
-              {buyAmount && parseFloat(buyAmount) > 0 && (
-                <div className="p-4 rounded-lg bg-accent/10 space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Total Cost</span>
-                    <span className="font-bold">
-                      {(parseFloat(buyAmount) * selectedListing.price).toFixed(
-                        2
-                      )}{" "}
-                      HBAR
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">CO₂ Offset</span>
-                    <span className="font-semibold">
-                      {(
-                        (parseFloat(buyAmount) / 1000) *
-                        selectedListing.co2Offset
-                      ).toFixed(3)}{" "}
-                      tons
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground pt-2 border-t border-border">
-                    <Download className="w-3 h-3" />
-                    <span>Certificate will be automatically downloaded</span>
-                  </div>
+              <div className="p-4 rounded-lg bg-accent/10 space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Total Cost</span>
+                  <span className="font-bold">
+                    {selectedListing.total_price.toFixed(2)} HBAR
+                  </span>
                 </div>
-              )}
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">CO₂ Offset</span>
+                  <span className="font-semibold">
+                    {selectedListing.co2_offset.toFixed(3)} tons
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 text-xs text-muted-foreground pt-2 border-t border-border">
+                  <Download className="w-3 h-3" />
+                  <span>Certificate will be automatically downloaded</span>
+                </div>
+              </div>
 
               <div className="flex gap-3">
                 <Button
@@ -545,7 +519,7 @@ const Marketplace = () => {
                       Seller Address
                     </p>
                     <p className="font-mono text-sm font-semibold">
-                      {selectedListing.seller}
+                      {selectedListing.seller_account_id}
                     </p>
                   </div>
                   <div>
@@ -553,20 +527,14 @@ const Marketplace = () => {
                       Price per Token
                     </p>
                     <p className="text-lg font-bold">
-                      {selectedListing.price} HBAR
+                      {selectedListing.total_price} HBAR
                     </p>
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">24h Change</p>
-                    <Badge
-                      variant={
-                        selectedListing.trend === "up"
-                          ? "default"
-                          : "destructive"
-                      }
-                    >
-                      {selectedListing.change > 0 ? "+" : ""}
-                      {selectedListing.change}%
+                    <Badge variant={true ? "default" : "destructive"}>
+                      {true ? "+" : ""}
+                      {2}%
                     </Badge>
                   </div>
                 </div>
@@ -582,25 +550,19 @@ const Marketplace = () => {
                   <div>
                     <p className="text-xs text-muted-foreground">Total Value</p>
                     <p className="text-lg font-bold">
-                      {selectedListing.price.toLocaleString()} HBAR
+                      {selectedListing.total_price.toLocaleString()} HBAR
                     </p>
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">CO₂ Offset</p>
                     <p className="text-lg font-bold">
-                      {selectedListing.co2Offset} tons
+                      {selectedListing.co2_offset} tons
                     </p>
                   </div>
                 </div>
               </div>
 
               <div className="pt-4 border-t border-border space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">
-                    Certification Round
-                  </span>
-                  <Badge variant="outline">Round {selectedListing.round}</Badge>
-                </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-muted-foreground">
                     Blockchain
@@ -623,18 +585,14 @@ const Marketplace = () => {
                 </p>
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart
-                    data={selectedListing.sparkline.map(
+                    data={[83, 48, 67, 38, 95, 24, 54].map(
                       (value: number, i: number) => ({ value, index: i })
                     )}
                   >
                     <Line
                       type="monotone"
                       dataKey="value"
-                      stroke={
-                        selectedListing.trend === "up"
-                          ? "hsl(95, 60%, 45%)"
-                          : "hsl(0, 40%, 55%)"
-                      }
+                      stroke={true ? "hsl(95, 60%, 45%)" : "hsl(0, 40%, 55%)"}
                       strokeWidth={2}
                       dot={false}
                     />

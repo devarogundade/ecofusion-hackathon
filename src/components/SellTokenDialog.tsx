@@ -15,6 +15,7 @@ import { DollarSign } from "lucide-react";
 import {
   AccountAllowanceApproveTransaction,
   AccountId,
+  ContractCallQuery,
   ContractExecuteTransaction,
   ContractFunctionParameters,
   ContractId,
@@ -26,6 +27,7 @@ import { executeTransaction } from "@/services/hashconnect";
 import useHashConnect from "@/hooks/useHashConnect";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { testnetClient } from "@/services/hederaclient";
 
 interface SellTokenDialogProps {
   availableTokens: number;
@@ -95,10 +97,24 @@ const SellTokenDialog = ({
 
       await executeTransaction(accountId, tx);
 
+      const client = testnetClient();
+      const listingIdCallQuery = new ContractCallQuery()
+        .setContractId(
+          ContractId.fromString(import.meta.env.VITE_MARKETPLACE_ID)
+        )
+        .setFunction("listingIdCounter")
+        .setGas(5_000_000);
+
+      const listingIdCall = await listingIdCallQuery.execute(client);
+      const listingId = Number(listingIdCall.getUint64(0));
+
       await supabase.from("marketplace_listings").insert({
         seller_id: user.id,
+        seller_account_id: accountId,
+        listing_id: listingId,
         expires_at: expiresAt.toISOString(),
         status: "listed",
+        tokens: Number(tokens),
         co2_offset: Number(tokens),
         price_per_token: Number(pricePerToken),
         total_price: Number(totalPrice),
