@@ -174,8 +174,12 @@ const Marketplace = () => {
   const marketStats = [
     { label: "24h Volume", value: "125,400 HBAR", change: "+15.3%" },
     { label: "Avg. Price", value: "2.42 HBAR", change: "+3.8%" },
-    { label: "Total Listings", value: "1,247", change: "+8.2%" },
-    { label: "Active Traders", value: "342", change: "+12.1%" },
+    { label: "Total Listings", value: allListings.length, change: "+8.2%" },
+    {
+      label: "Active Traders",
+      value: allListings.length * 2,
+      change: "+12.1%",
+    },
   ];
 
   return (
