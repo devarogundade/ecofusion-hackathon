@@ -17,48 +17,48 @@ export type Database = {
       carbon_actions: {
         Row: {
           action_date: string;
+          action_id: number;
           action_type: string;
           co2_impact: number;
-          action_id: number;
           created_at: string;
           description: string;
           id: string;
           location: string | null;
           proof_url: string | null;
-          topic_id: string | null;
           tokens_minted: number | null;
+          topic_id: string | null;
           updated_at: string;
           user_id: string;
           verification_status: string;
         };
         Insert: {
           action_date: string;
+          action_id?: number;
           action_type: string;
           co2_impact: number;
-          action_id: number;
           created_at?: string;
           description: string;
           id?: string;
           location?: string | null;
           proof_url?: string | null;
-          topic_id: string | null;
           tokens_minted?: number | null;
+          topic_id?: string | null;
           updated_at?: string;
           user_id: string;
           verification_status?: string;
         };
         Update: {
           action_date?: string;
+          action_id?: number;
           action_type?: string;
           co2_impact?: number;
-          action_id: number;
           created_at?: string;
           description?: string;
           id?: string;
           location?: string | null;
           proof_url?: string | null;
-          topic_id: string | null;
           tokens_minted?: number | null;
+          topic_id?: string | null;
           updated_at?: string;
           user_id?: string;
           verification_status?: string;
@@ -80,7 +80,7 @@ export type Database = {
         Insert: {
           co2_offset: number;
           created_at?: string;
-          expires_at: string;
+          expires_at?: string;
           id?: string;
           price_per_token: number;
           seller_id: string;
@@ -91,13 +91,43 @@ export type Database = {
         Update: {
           co2_offset?: number;
           created_at?: string;
-          expires_at: string;
+          expires_at?: string;
           id?: string;
           price_per_token?: number;
           seller_id?: string;
           status?: string;
           total_price?: number;
           updated_at?: string;
+        };
+        Relationships: [];
+      };
+      profiles: {
+        Row: {
+          carbon_tokens: number | null;
+          created_at: string;
+          full_name: string | null;
+          hbar_balance: number | null;
+          id: string;
+          updated_at: string;
+          wallet_address: string | null;
+        };
+        Insert: {
+          carbon_tokens?: number | null;
+          created_at?: string;
+          full_name?: string | null;
+          hbar_balance?: number | null;
+          id: string;
+          updated_at?: string;
+          wallet_address?: string | null;
+        };
+        Update: {
+          carbon_tokens?: number | null;
+          created_at?: string;
+          full_name?: string | null;
+          hbar_balance?: number | null;
+          id?: string;
+          updated_at?: string;
+          wallet_address?: string | null;
         };
         Relationships: [];
       };
@@ -142,6 +172,27 @@ export type Database = {
           }
         ];
       };
+      user_roles: {
+        Row: {
+          created_at: string;
+          id: string;
+          role: Database["public"]["Enums"]["app_role"];
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          id?: string;
+          role: Database["public"]["Enums"]["app_role"];
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          role?: Database["public"]["Enums"]["app_role"];
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       verra_rounds: {
         Row: {
           achieved_amount: number | null;
@@ -151,9 +202,9 @@ export type Database = {
           is_certified: boolean | null;
           round_number: number;
           start_date: string | null;
-          topic_id: string | null;
           status: string;
           target_amount: number;
+          topic_id: string | null;
         };
         Insert: {
           achieved_amount?: number | null;
@@ -163,9 +214,9 @@ export type Database = {
           is_certified?: boolean | null;
           round_number: number;
           start_date?: string | null;
-          topic_id: string | null;
           status: string;
           target_amount: number;
+          topic_id?: string | null;
         };
         Update: {
           achieved_amount?: number | null;
@@ -175,9 +226,9 @@ export type Database = {
           is_certified?: boolean | null;
           round_number?: number;
           start_date?: string | null;
-          topic_id: string | null;
           status?: string;
           target_amount?: number;
+          topic_id?: string | null;
         };
         Relationships: [];
       };
@@ -186,10 +237,16 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
-      [_ in never]: never;
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"];
+          _user_id: string;
+        };
+        Returns: boolean;
+      };
     };
     Enums: {
-      [_ in never]: never;
+      app_role: "admin" | "user";
     };
     CompositeTypes: {
       [_ in never]: never;
@@ -319,6 +376,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "user"],
+    },
   },
 } as const;

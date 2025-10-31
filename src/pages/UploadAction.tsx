@@ -139,8 +139,8 @@ const UploadAction = () => {
           "submit",
           new ContractFunctionParameters().addString(metadataUrl)
         )
-        .setGas(5_000_000)
-        .freezeWith(client);
+        .setGas(5_000_000);
+
       await executeTransaction(accountId, tx);
 
       const actionIdCallQuery = new ContractCallQuery()
@@ -162,7 +162,7 @@ const UploadAction = () => {
       const txResponse = await topicTx.execute(client);
       const receipt = await txResponse.getReceipt(client);
 
-      const topicMsgTx = new TopicMessageSubmitTransaction()
+      new TopicMessageSubmitTransaction()
         .setTopicId(receipt.topicId)
         .setMessage(
           JSON.stringify({
@@ -175,9 +175,8 @@ const UploadAction = () => {
             accountId,
           })
         )
-        .freezeWith(client);
-
-      await topicMsgTx.execute(client);
+        .freezeWith(client)
+        .execute(client);
 
       await supabase.from("carbon_actions").insert({
         co2_impact: 0,

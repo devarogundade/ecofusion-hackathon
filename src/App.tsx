@@ -12,6 +12,7 @@ import Calculator from "./pages/Calculator";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import { AppProvider } from "./contexts/AppContext";
+import Admin from "./pages/Admin";
 
 const queryClient = new QueryClient();
 
@@ -30,6 +31,7 @@ const App = () => (
               <Route path="/marketplace" element={<Marketplace />} />
               <Route path="/upload-action" element={<UploadAction />} />
               <Route path="/calculator" element={<Calculator />} />
+              <Route path="/admin" element={<Admin />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
