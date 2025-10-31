@@ -208,6 +208,8 @@ const Dashboard = () => {
           verification_status: "claimed",
         })
         .eq("id", actionId);
+
+      fetchCarbonOffsetBalance();
     } catch (error) {
       console.log(error);
       toast.error(error?.message);
