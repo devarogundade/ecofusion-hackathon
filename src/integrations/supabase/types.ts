@@ -43,7 +43,7 @@ export type Database = {
           location?: string | null;
           proof_url?: string | null;
           tokens_minted?: number | null;
-          serial_number: number | null;
+          serial_number?: number | null;
           topic_id?: string | null;
           updated_at?: string;
           user_id: string;
@@ -60,7 +60,7 @@ export type Database = {
           location?: string | null;
           proof_url?: string | null;
           tokens_minted?: number | null;
-          serial_number: number | null;
+          serial_number?: number | null;
           topic_id?: string | null;
           updated_at?: string;
           user_id?: string;

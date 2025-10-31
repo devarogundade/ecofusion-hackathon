@@ -18,7 +18,6 @@ import {
   ContractId,
   TopicMessageSubmitTransaction,
 } from "@hashgraph/sdk";
-import useHashConnect from "@/hooks/useHashConnect";
 import { testnetClient } from "@/services/hederaclient";
 import { ethers } from "ethers";
 

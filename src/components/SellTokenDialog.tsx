@@ -43,77 +43,78 @@ const SellTokenDialog = ({
   const { accountId } = useHashConnect();
 
   const handleSell = async () => {
-    const tokenAmount = parseFloat(tokens);
-    if (!tokenAmount || tokenAmount <= 0) {
-      toast({
-        title: "Invalid amount",
-        description: "Please enter a valid token amount",
-        variant: "destructive",
+    try {
+      const tokenAmount = parseFloat(tokens);
+      if (!tokenAmount || tokenAmount <= 0) {
+        toast({
+          title: "Invalid amount",
+          description: "Please enter a valid token amount",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (tokenAmount > availableTokens) {
+        toast({
+          title: "Insufficient tokens",
+          description: `You only have ${availableTokens} tokens available`,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const totalPrice = Number(tokenAmount * parseFloat(pricePerToken))
+        .toFixed(4)
+        .toString();
+      const expiresAt = new Date(expiresDate);
+      const expiresIn = Math.ceil(expiresAt.getTime() / 1000);
+
+      console.log({ expiresIn });
+
+      const approvetx =
+        new AccountAllowanceApproveTransaction().approveTokenAllowance(
+          TokenId.fromString(`${import.meta.env.VITE_CARBON_CREDIT_TOKEN_ID}`),
+          AccountId.fromString(accountId),
+          ContractId.fromString(import.meta.env.VITE_MARKETPLACE_ID),
+          Number(ethers.parseUnits(totalPrice.toString(), 8))
+        );
+
+      await executeTransaction(accountId, approvetx);
+
+      const tx = new ContractExecuteTransaction()
+        .setContractId(
+          ContractId.fromString(import.meta.env.VITE_MARKETPLACE_ID)
+        )
+        .setFunction(
+          "list",
+          new ContractFunctionParameters()
+            .addInt64(Number(ethers.parseUnits(tokens, 8)))
+            .addInt64(Number(ethers.parseUnits(totalPrice.toString(), 8)))
+            .addInt64(expiresIn)
+        )
+        .setGas(5_000_000);
+
+      await executeTransaction(accountId, tx);
+
+      await supabase.from("marketplace_listings").insert({
+        seller_id: accountId,
+        expires_at: expiresAt.toISOString(),
+        status: "listed",
+        co2_offset: Number(tokens),
+        price_per_token: Number(pricePerToken),
+        total_price: Number(totalPrice),
       });
-      return;
-    }
 
-    if (tokenAmount > availableTokens) {
       toast({
-        title: "Insufficient tokens",
-        description: `You only have ${availableTokens} tokens available`,
-        variant: "destructive",
+        title: "Listing created!",
+        description: `${tokenAmount} tokens listed for ${totalPrice} HBAR`,
       });
-      return;
+
+      setOpen(false);
+      setTokens("");
+    } catch (error) {
+      console.log(error);
     }
-
-    const totalPrice = tokenAmount * parseFloat(pricePerToken);
-    const expiresAt = new Date(expiresDate);
-    const expiresIn = Math.ceil(expiresAt.getTime() / 1000);
-
-    const approvetx = new AccountAllowanceApproveTransaction({
-      tokenApprovals: [
-        new TokenAllowance({
-          tokenId: TokenId.fromString(
-            import.meta.env.VITE_CARBON_CREDIT_TOKEN_ID
-          ),
-          spenderAccountId: AccountId.fromString(
-            import.meta.env.VITE_MARKETPLACE_ID
-          ),
-          amount: Number(ethers.parseUnits(tokens, 8)),
-          ownerAccountId: AccountId.fromString(accountId),
-        }),
-      ],
-    });
-
-    await executeTransaction(accountId, approvetx);
-
-    const tx = new ContractExecuteTransaction()
-      .setContractId(ContractId.fromString(import.meta.env.VITE_MARKETPLACE_ID))
-      .setFunction(
-        "list",
-        new ContractFunctionParameters()
-          .addInt64(Number(ethers.parseUnits(tokens, 8)))
-          .addInt64(Number(ethers.parseUnits(totalPrice.toString(), 8)))
-          .addInt64(expiresIn)
-      )
-      .setGas(5_000_000);
-
-    await executeTransaction(accountId, tx);
-
-    await supabase.from("marketplace_listings").insert({
-      seller_id: accountId,
-      expires_at: expiresAt.toISOString(),
-      status: "listed",
-      co2_offset: Number(tokens),
-      price_per_token: Number(pricePerToken),
-      total_price: totalPrice,
-    });
-
-    toast({
-      title: "Listing created!",
-      description: `${tokenAmount} tokens listed for ${totalPrice.toFixed(
-        2
-      )} HBAR`,
-    });
-
-    setOpen(false);
-    setTokens("");
   };
 
   return (
@@ -162,6 +163,17 @@ const SellTokenDialog = ({
               step="0.01"
               value={pricePerToken}
               onChange={(e) => setPricePerToken(e.target.value)}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="tokens">Expires At</Label>
+            <Input
+              id="expiresDate"
+              type="date"
+              placeholder="Enter expires date"
+              value={expiresDate}
+              onChange={(e) => setExpiresDate(e.target.value)}
             />
           </div>
 

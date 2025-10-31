@@ -44,10 +44,12 @@ import {
   Long,
   NftId,
   TokenNftInfoQuery,
+  TopicMessageSubmitTransaction,
 } from "@hashgraph/sdk";
 import { testnetClient } from "@/services/hederaclient";
 import { executeTransaction } from "@/services/hashconnect";
 import { toast } from "sonner";
+import { ethers } from "ethers";
 
 type CarbonAction = {
   id: string;
@@ -95,9 +97,14 @@ const Dashboard = () => {
     const accountInfo = await accountInfoQuery.execute(client);
 
     setCarbonOffsets(
-      accountInfo?.tokens?.get(
-        TokenId.fromString(import.meta.env.VITE_CARBON_CREDIT_TOKEN_ID)
-      ) || 0
+      ethers.formatUnits(
+        Number(
+          accountInfo?.tokens?.get(
+            TokenId.fromString(import.meta.env.VITE_CARBON_CREDIT_TOKEN_ID)
+          ) || 0
+        ).toString(),
+        8
+      )
     );
   }, [accountId]);
 
@@ -131,7 +138,11 @@ const Dashboard = () => {
   ).length;
   const totalCO2 = actions.reduce((sum, a) => sum + Number(a.co2_impact), 0);
 
-  const handleRedeemAction = async (serialNumber: number) => {
+  const handleRedeemAction = async (
+    actionId: string,
+    serialNumber: number,
+    topicId: string
+  ) => {
     try {
       setIsClaiming(true);
 
@@ -180,6 +191,23 @@ const Dashboard = () => {
         .setGas(5_000_000);
 
       await executeTransaction(accountId, tx);
+
+      const topicTx = new TopicMessageSubmitTransaction()
+        .setTopicId(topicId)
+        .setMessage(
+          JSON.stringify({
+            verification_status: "claimed",
+          })
+        );
+
+      await topicTx.execute(client);
+
+      await supabase
+        .from("carbon_actions")
+        .update({
+          verification_status: "claimed",
+        })
+        .eq("id", actionId);
     } catch (error) {
       console.log(error);
       toast.error(error?.message);
@@ -479,7 +507,11 @@ const Dashboard = () => {
                           <Button
                             disabled={isClaiming}
                             onClick={() =>
-                              handleRedeemAction(action.serial_number)
+                              handleRedeemAction(
+                                action.id,
+                                action.serial_number,
+                                action.topic_id
+                              )
                             }
                           >
                             Claim
