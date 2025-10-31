@@ -93,7 +93,9 @@ const VERRAProgress = () => {
             </div>
             <Progress value={progressPercentage} className="mb-2" />
             <div className="flex justify-between text-sm text-muted-foreground">
-              <span>{activeRound.achieved_amount.toLocaleString()} raised</span>
+              <span>
+                {activeRound.achieved_amount.toLocaleString()} CO₂ saved
+              </span>
               <span>{activeRound.target_amount.toLocaleString()} target</span>
             </div>
           </div>
@@ -140,13 +142,13 @@ const VERRAProgress = () => {
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Target:</span>
                       <span className="font-medium">
-                        ${round.target_amount.toLocaleString()}
+                        {round.target_amount.toLocaleString()} CO₂
                       </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Achieved:</span>
                       <span className="font-medium">
-                        ${round.achieved_amount.toLocaleString()}
+                        {round.achieved_amount.toLocaleString()} CO₂
                       </span>
                     </div>
                     <div className="flex justify-between items-center">
