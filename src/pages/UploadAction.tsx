@@ -23,15 +23,23 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { useIPFS } from "@/hooks/useIPFS";
 import {
+  AccountId,
+  AccountInfoQuery,
+  ContractCallQuery,
   ContractExecuteTransaction,
   ContractFunctionParameters,
   ContractId,
+  TokenAssociateTransaction,
+  TokenId,
+  TopicCreateTransaction,
+  TopicMessageSubmitTransaction,
 } from "@hashgraph/sdk";
 import { executeTransaction } from "@/services/hashconnect";
 import useHashConnect from "@/hooks/useHashConnect";
 import { supabase } from "@/integrations/supabase/client";
 import { generateReview } from "@/services/aiService";
 import { useAuth } from "@/hooks/useAuth";
+import { testnetClient } from "@/services/hederaclient";
 
 const UploadAction = () => {
   const [isVerifying, setIsVerifying] = useState(false);
@@ -102,9 +110,30 @@ const UploadAction = () => {
 
       const { url: metadataUrl } = await upload(metadataBase64);
 
+      const accountInfoQuery = new AccountInfoQuery().setAccountId(
+        AccountId.fromString(accountId)
+      );
+
+      const client = testnetClient();
+      const accountInfo = await accountInfoQuery.execute(client);
+
+      const tokenRelationship = accountInfo.tokenRelationships.get(
+        TokenId.fromString(import.meta.env.VITE_ACTION_REPOSITORY_TOKEN_ID)
+      );
+
+      if (!tokenRelationship) {
+        const associateTx = new TokenAssociateTransaction()
+          .setAccountId(AccountId.fromString(accountId))
+          .setTokenIds([
+            TokenId.fromString(import.meta.env.VITE_ACTION_REPOSITORY_TOKEN_ID),
+          ]);
+
+        await executeTransaction(accountId, associateTx);
+      }
+
       const tx = new ContractExecuteTransaction()
         .setContractId(
-          ContractId.fromString(import.meta.env.VITE_ACTION_CONTRACT_ID)
+          ContractId.fromString(import.meta.env.VITE_ACTION_REPOSITORY_ID)
         )
         .setFunction(
           "submit",
@@ -112,9 +141,42 @@ const UploadAction = () => {
         )
         .setGas(5_000_000);
 
-      const txReceipt = await executeTransaction(accountId, tx);
+      await executeTransaction(accountId, tx);
 
-      console.log({ txId: txReceipt.scheduledTransactionId.toString() });
+      const actionIdCallQuery = new ContractCallQuery()
+        .setContractId(
+          ContractId.fromString(import.meta.env.VITE_ACTION_REPOSITORY_ID)
+        )
+        .setFunction("actionIdCounter")
+        .setGas(5_000_000);
+
+      const actionIdCall = await actionIdCallQuery.execute(client);
+      const actionId = Number(actionIdCall.getUint64(0));
+
+      const topicTx = new TopicCreateTransaction()
+        .setTopicMemo(`${actionType}:Action Upload`)
+        .setAdminKey(import.meta.env.VITE_OPERATOR_ID)
+        .setSubmitKey(import.meta.env.VITE_OPERATOR_KEY)
+        .setAutoRenewPeriod(2_592_000);
+
+      const txResponse = await topicTx.execute(client);
+      const receipt = await txResponse.getReceipt(client);
+
+      const topicMsgTx = new TopicMessageSubmitTransaction()
+        .setTopicId(receipt.topicId)
+        .setMessage(
+          JSON.stringify({
+            actionType,
+            description,
+            location,
+            aiReview,
+            fileUrl,
+            fileMimetype,
+            accountId,
+          })
+        );
+
+      await topicMsgTx.execute(client);
 
       await supabase.from("carbon_actions").insert({
         co2_impact: 0,
@@ -123,17 +185,24 @@ const UploadAction = () => {
         tokens_minted: 0,
         location,
         action_type: actionType,
+        topic_id: receipt.topicId.toString(),
         description,
         action_date: actionDate,
         proof_url: metadataUrl,
+        action_id: actionId,
       });
 
       toast.success(
-        `Action verified successfully! Tokens will be minted to your wallet after review is completed.`
+        `
+        Action submitted successfully! 
+        Tokens will be minted to your wallet after review is completed. 
+        Topic ID: ${receipt.topicId}
+        `
       );
 
       setIsSubmitted(true);
     } catch (error) {
+      console.log(error);
       toast.error(error?.message);
       setIsSubmitted(false);
     } finally {

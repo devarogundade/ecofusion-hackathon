@@ -104,7 +104,7 @@ const VERRAProgress = () => {
             slidesPerView={1}
             navigation
             pagination={{ clickable: true }}
-            autoplay={{ delay: 5000, disableOnInteraction: false }}
+            // autoplay={{ delay: 5000, disableOnInteraction: false }}
             breakpoints={{
               640: {
                 slidesPerView: 1.5,
@@ -164,14 +164,28 @@ const VERRAProgress = () => {
                           round.status.slice(1)}
                       </Badge>
                     </div>
-                    {round.is_certified && (
-                      <div className="pt-2 border-t border-border">
+                    {round.is_certified ? (
+                      <div className="pt-2 border-t border-border flex justify-between">
                         <Badge
                           variant="outline"
                           className="text-accent border-accent"
                         >
                           <CheckCircle2 className="w-3 h-3 mr-1" />
                           VERRA Certified
+                        </Badge>
+
+                        <a href="" className="text-accent underline">
+                          0.0.7163937
+                        </a>
+                      </div>
+                    ) : (
+                      <div className="pt-2 border-t border-border">
+                        <Badge
+                          variant="outline"
+                          className="text-secondary border-secondary"
+                        >
+                          <CheckCircle2 className="w-3 h-3 mr-1" />
+                          VERRA Certificate Pending
                         </Badge>
                       </div>
                     )}

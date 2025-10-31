@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Navigation from "@/components/Navigation";
 import StatsCard from "@/components/StatsCard";
 import VERRAProgress from "@/components/VERRAProgress";
@@ -30,6 +30,22 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 import useHashConnect from "@/hooks/useHashConnect";
+import {
+  AccountAllowanceApproveTransaction,
+  AccountBalanceQuery,
+  AccountId,
+  AccountInfoQuery,
+  ContractExecuteTransaction,
+  ContractFunctionParameters,
+  ContractId,
+  TokenAssociateTransaction,
+  TokenId,
+  TokenNftAllowance,
+  Long,
+} from "@hashgraph/sdk";
+import { testnetClient } from "@/services/hederaclient";
+import { executeTransaction } from "@/services/hashconnect";
+import { toast } from "sonner";
 
 type CarbonAction = {
   id: string;
@@ -38,6 +54,7 @@ type CarbonAction = {
   verification_status: string;
   created_at: string;
   tokens_minted: number;
+  action_id: number;
 };
 
 type Profile = {
@@ -47,23 +64,50 @@ type Profile = {
 
 const Dashboard = () => {
   const { user, isLoading: authLoading } = useAuth();
-  const [profile, setProfile] = useState<Profile | null>(null);
+  const [hbarBalance, setHbarBalance] = useState("0");
+  const [carbonOffsets, setCarbonOffsets] = useState("0");
   const [actions, setActions] = useState<CarbonAction[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isClaiming, setIsClaiming] = useState(false);
 
   const { accountId, connect, disconnect } = useHashConnect();
 
-  useEffect(() => {
-    if (user) {
-      fetchDashboardData();
-    }
-  }, [user]);
+  const fetchBalance = useCallback(async () => {
+    if (!accountId) return;
 
-  const fetchDashboardData = async () => {
+    const accountInfoQuery = new AccountInfoQuery().setAccountId(
+      AccountId.fromString(accountId)
+    );
+
+    const client = testnetClient();
+    const accountInfo = await accountInfoQuery.execute(client);
+
+    setHbarBalance(accountInfo?.balance?.toString());
+  }, [accountId]);
+
+  const fetchCarbonOffsetBalance = useCallback(async () => {
+    if (!accountId) return;
+
+    const accountInfoQuery = new AccountBalanceQuery().setAccountId(
+      AccountId.fromString(accountId)
+    );
+
+    const client = testnetClient();
+    const accountInfo = await accountInfoQuery.execute(client);
+
+    console.log({ accountInfo });
+
+    const token = accountInfo?.tokens.get(
+      TokenId.fromString(import.meta.env.VITE_CARBON_CREDIT_TOKEN_ID)
+    );
+
+    setCarbonOffsets(token?.balance || 0);
+  }, [accountId]);
+
+  const fetchDashboardData = useCallback(async () => {
     if (!user) return;
 
-    const [profileData, actionsData] = await Promise.all([
-      supabase.from("profiles").select("*").eq("id", user.id).single(),
+    const [actionsData] = await Promise.all([
       supabase
         .from("carbon_actions")
         .select("*")
@@ -72,27 +116,102 @@ const Dashboard = () => {
         .limit(5),
     ]);
 
-    if (profileData.data) setProfile(profileData.data);
     if (actionsData.data) setActions(actionsData.data);
     setIsLoading(false);
-  };
+  }, [user]);
+
+  useEffect(() => {
+    fetchDashboardData();
+    fetchCarbonOffsetBalance();
+  }, [fetchDashboardData, fetchCarbonOffsetBalance]);
+
+  useEffect(() => {
+    fetchBalance();
+  }, [fetchBalance]);
 
   const verifiedActions = actions.filter(
     (a) => a.verification_status === "verified"
   ).length;
   const totalCO2 = actions.reduce((sum, a) => sum + Number(a.co2_impact), 0);
 
+  const handleRedeemAction = async (serialNumber: number) => {
+    try {
+      setIsClaiming(true);
+
+      const approvetx = new AccountAllowanceApproveTransaction({
+        nftApprovals: [
+          new TokenNftAllowance({
+            tokenId: TokenId.fromString(
+              import.meta.env.VITE_CARBON_CREDIT_TOKEN_ID
+            ),
+            spenderAccountId: AccountId.fromString(
+              import.meta.env.VITE_CARBON_CREDIT_ID
+            ),
+            delegatingSpender: AccountId.fromString(
+              import.meta.env.VITE_CARBON_CREDIT_ID
+            ),
+            serialNumbers: [Long.fromNumber(serialNumber)],
+            ownerAccountId: AccountId.fromString(accountId),
+            allSerials: true,
+          }),
+        ],
+      });
+
+      await executeTransaction(accountId, approvetx);
+
+      const accountInfoQuery = new AccountInfoQuery().setAccountId(
+        AccountId.fromString(accountId)
+      );
+
+      const client = testnetClient();
+      const accountInfo = await accountInfoQuery.execute(client);
+
+      const tokenRelationship = accountInfo.tokenRelationships.get(
+        TokenId.fromString(import.meta.env.VITE_CARBON_CREDIT_TOKEN_ID)
+      );
+
+      if (!tokenRelationship) {
+        const associateTx = new TokenAssociateTransaction()
+          .setAccountId(AccountId.fromString(accountId))
+          .setTokenIds([
+            TokenId.fromString(import.meta.env.VITE_CARBON_CREDIT_TOKEN_ID),
+          ]);
+
+        await executeTransaction(accountId, associateTx);
+      }
+
+      const tx = new ContractExecuteTransaction()
+        .setContractId(
+          ContractId.fromString(import.meta.env.VITE_CARBON_CREDIT_ID)
+        )
+        .setFunction(
+          "reedemAction",
+          new ContractFunctionParameters().addInt64(
+            Long.fromNumber(serialNumber)
+          )
+        )
+        .setGas(5_000_000);
+
+      await executeTransaction(accountId, tx);
+    } catch (error) {
+      console.log(error);
+      toast.error(error?.message);
+    } finally {
+      setIsClaiming(false);
+    }
+  };
+
   const stats = [
     {
       title: "Total Carbon Tokens",
-      value: profile?.carbon_tokens?.toFixed(2) || "0",
+      value: carbonOffsets,
       change: "+12.5% this month",
       icon: Coins,
       trend: "up" as const,
     },
     {
       title: "HBAR Balance",
-      value: `${profile?.hbar_balance?.toFixed(2) || "0"} ℏ`,
+      value: `${hbarBalance} ℏ`,
       change: "+8.3% this month",
       icon: TrendingUp,
       trend: "up" as const,
@@ -114,15 +233,15 @@ const Dashboard = () => {
   ];
 
   const chartData = [
-    { month: "Jan", tokens: 120, value: 280 },
-    { month: "Feb", tokens: 250, value: 580 },
-    { month: "Mar", tokens: 380, value: 880 },
-    { month: "Apr", tokens: 520, value: 1200 },
-    { month: "May", tokens: 780, value: 1800 },
+    { month: "Jun", tokens: 0, value: 0 },
+    { month: "Jul", tokens: 0, value: 0 },
+    { month: "Aug", tokens: 0, value: 0 },
+    { month: "Sep", tokens: 0, value: 0 },
+    { month: "Oct", tokens: 0, value: 0 },
     {
-      month: "Jun",
-      tokens: profile?.carbon_tokens || 1234,
-      value: profile?.hbar_balance || 2847,
+      month: "Nov",
+      tokens: carbonOffsets,
+      value: hbarBalance,
     },
   ];
 
@@ -204,7 +323,7 @@ const Dashboard = () => {
                   </Button>
                 </Link>
                 <SellTokenDialog
-                  availableTokens={profile?.carbon_tokens || 0}
+                  availableTokens={Number(carbonOffsets)}
                   trigger={
                     <Button variant="outline" className="flex-1 w-full">
                       <DollarSign className="w-4 h-4 mr-2" />
@@ -361,9 +480,17 @@ const Dashboard = () => {
                               .toUpperCase() +
                               action.verification_status.slice(1)}
                           </p>
+                          <a href="" className="text-accent underline">
+                            0.0.7163937
+                          </a>
                         </div>
-                        {action.verification_status === "verified" && (
-                          <CheckCircle2 className="w-5 h-5 text-accent" />
+                        {action.verification_status !== "verified" && (
+                          <Button
+                            disabled={isClaiming}
+                            onClick={() => handleRedeemAction(action.action_id)}
+                          >
+                            Claim
+                          </Button>
                         )}
                       </div>
                     </div>

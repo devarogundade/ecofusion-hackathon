@@ -39,7 +39,27 @@ export const generateReview = async (
           parts: [
             {
               text: `
-                You are an AI agent.
+                You are an AI agent that reviews sustainable actions. 
+                Based on the provided data, you generate a professional assessment 
+                and calculate the amount of CO₂ emissions reduced or removed.
+
+                Example:
+
+                Input Data:
+                {
+                  "actionType": "Tree Planting",
+                  "location": "Kaduna, Nigeria",
+                  "treesPlanted": 250,
+                  "verificationMethod": "Satellite & IoT sensors",
+                  "durationMonths": 12
+                }
+
+                Expected Review:
+                The action involves planting 250 trees in Kaduna, Nigeria, verified using satellite and IoT-based monitoring. 
+                Based on regional carbon sequestration rates (approximately 21 kg CO₂ per tree per year), 
+                this activity is estimated to reduce around 5.25 metric tons of CO₂ annually. 
+                The project demonstrates strong sustainability impact, particularly in restoring degraded land 
+                and enhancing local air quality.
               `,
             },
           ],

@@ -12,19 +12,37 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { DollarSign } from "lucide-react";
+import {
+  AccountAllowanceApproveTransaction,
+  AccountId,
+  ContractExecuteTransaction,
+  ContractFunctionParameters,
+  ContractId,
+  TokenAllowance,
+  TokenId,
+} from "@hashgraph/sdk";
+import { ethers } from "ethers";
+import { executeTransaction } from "@/services/hashconnect";
+import useHashConnect from "@/hooks/useHashConnect";
+import { supabase } from "@/integrations/supabase/client";
 
 interface SellTokenDialogProps {
   availableTokens: number;
   trigger?: React.ReactNode;
 }
 
-const SellTokenDialog = ({ availableTokens, trigger }: SellTokenDialogProps) => {
+const SellTokenDialog = ({
+  availableTokens,
+  trigger,
+}: SellTokenDialogProps) => {
   const [open, setOpen] = useState(false);
   const [tokens, setTokens] = useState("");
-  const [pricePerToken, setPricePerToken] = useState("2.42");
+  const [pricePerToken, setPricePerToken] = useState("");
+  const [expiresDate, setExpiresDate] = useState("");
   const { toast } = useToast();
+  const { accountId } = useHashConnect();
 
-  const handleSell = () => {
+  const handleSell = async () => {
     const tokenAmount = parseFloat(tokens);
     if (!tokenAmount || tokenAmount <= 0) {
       toast({
@@ -44,13 +62,56 @@ const SellTokenDialog = ({ availableTokens, trigger }: SellTokenDialogProps) => 
       return;
     }
 
-    const totalHBAR = tokenAmount * parseFloat(pricePerToken);
-    
+    const totalPrice = tokenAmount * parseFloat(pricePerToken);
+    const expiresAt = new Date(expiresDate);
+    const expiresIn = Math.ceil(expiresAt.getTime() / 1000);
+
+    const approvetx = new AccountAllowanceApproveTransaction({
+      tokenApprovals: [
+        new TokenAllowance({
+          tokenId: TokenId.fromString(
+            import.meta.env.VITE_CARBON_CREDIT_TOKEN_ID
+          ),
+          spenderAccountId: AccountId.fromString(
+            import.meta.env.VITE_MARKETPLACE_ID
+          ),
+          amount: Number(ethers.parseUnits(tokens, 8)),
+          ownerAccountId: AccountId.fromString(accountId),
+        }),
+      ],
+    });
+
+    await executeTransaction(accountId, approvetx);
+
+    const tx = new ContractExecuteTransaction()
+      .setContractId(ContractId.fromString(import.meta.env.VITE_MARKETPLACE_ID))
+      .setFunction(
+        "list",
+        new ContractFunctionParameters()
+          .addInt64(Number(ethers.parseUnits(tokens, 8)))
+          .addInt64(Number(ethers.parseUnits(totalPrice.toString(), 8)))
+          .addInt64(expiresIn)
+      )
+      .setGas(5_000_000);
+
+    await executeTransaction(accountId, tx);
+
+    await supabase.from("marketplace_listings").insert({
+      seller_id: accountId,
+      expires_at: expiresAt.toISOString(),
+      status: "listed",
+      co2_offset: Number(tokens),
+      price_per_token: Number(pricePerToken),
+      total_price: totalPrice,
+    });
+
     toast({
       title: "Listing created!",
-      description: `${tokenAmount} tokens listed for ${totalHBAR.toFixed(2)} HBAR`,
+      description: `${tokenAmount} tokens listed for ${totalPrice.toFixed(
+        2
+      )} HBAR`,
     });
-    
+
     setOpen(false);
     setTokens("");
   };
@@ -69,15 +130,18 @@ const SellTokenDialog = ({ availableTokens, trigger }: SellTokenDialogProps) => 
         <DialogHeader>
           <DialogTitle>Sell Carbon Tokens</DialogTitle>
           <DialogDescription>
-            List your fractionalized carbon tokens on the marketplace to receive HBAR
+            List your fractionalized carbon tokens on the marketplace to receive
+            HBAR
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4 py-4">
           <div className="space-y-2">
             <Label>Available Tokens</Label>
-            <div className="text-2xl font-bold">{availableTokens.toLocaleString()}</div>
+            <div className="text-2xl font-bold">
+              {availableTokens.toLocaleString()}
+            </div>
           </div>
-          
+
           <div className="space-y-2">
             <Label htmlFor="tokens">Tokens to Sell</Label>
             <Input
@@ -104,16 +168,23 @@ const SellTokenDialog = ({ availableTokens, trigger }: SellTokenDialogProps) => 
           {tokens && parseFloat(tokens) > 0 && (
             <div className="p-4 rounded-lg bg-accent/10">
               <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">Total Value</span>
+                <span className="text-sm text-muted-foreground">
+                  Total Value
+                </span>
                 <span className="text-xl font-bold">
-                  {(parseFloat(tokens) * parseFloat(pricePerToken)).toFixed(2)} HBAR
+                  {(parseFloat(tokens) * parseFloat(pricePerToken)).toFixed(2)}{" "}
+                  HBAR
                 </span>
               </div>
             </div>
           )}
 
           <div className="flex gap-3">
-            <Button variant="outline" onClick={() => setOpen(false)} className="flex-1">
+            <Button
+              variant="outline"
+              onClick={() => setOpen(false)}
+              className="flex-1"
+            >
               Cancel
             </Button>
             <Button onClick={handleSell} className="flex-1" variant="gradient">

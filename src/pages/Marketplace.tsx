@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Navigation from "@/components/Navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -32,151 +32,62 @@ import {
 import { LineChart, Line, ResponsiveContainer } from "recharts";
 import { useToast } from "@/hooks/use-toast";
 import { generateCertificate } from "@/utils/pdfGenerator";
+import {
+  ContractExecuteTransaction,
+  ContractFunctionParameters,
+  ContractId,
+  Hbar,
+} from "@hashgraph/sdk";
+import { executeTransaction } from "@/services/hashconnect";
+import useHashConnect from "@/hooks/useHashConnect";
+import { supabase } from "@/integrations/supabase/client";
+
+interface Listing {
+  id: number;
+  price: number;
+  tokens: number;
+  co2Offset: number;
+  seller: string;
+  listingId: number;
+  trend: string;
+  sparkline: any;
+  change: number;
+  round: number;
+}
 
 const Marketplace = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [buyDialogOpen, setBuyDialogOpen] = useState(false);
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   const [certificateDialogOpen, setCertificateDialogOpen] = useState(false);
-  const [selectedListing, setSelectedListing] = useState<any>(null);
+  const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
   const [buyAmount, setBuyAmount] = useState("");
   const [certificateData, setCertificateData] = useState<any>(null);
   const { toast } = useToast();
+  const { accountId } = useHashConnect();
+  const [allListings, setAllListings] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const itemsPerPage = 9;
+  // [2.1, 2.2, 2.15, 2.3, 2.4, 2.45]
 
-  const allListings = [
-    {
-      id: 1,
-      seller: "0x742d...4A9E",
-      tokens: 500,
-      price: 2.45,
-      total: 1225,
-      change: 12.5,
-      trend: "up" as const,
-      sparkline: [2.1, 2.2, 2.15, 2.3, 2.4, 2.45],
-      co2Offset: 0.5,
-      round: 2,
-      certified: true,
-    },
-    {
-      id: 2,
-      seller: "0x8F3C...12BD",
-      tokens: 1200,
-      price: 2.38,
-      total: 2856,
-      change: -3.2,
-      trend: "down" as const,
-      sparkline: [2.5, 2.45, 2.42, 2.4, 2.39, 2.38],
-      co2Offset: 1.2,
-      round: 2,
-      certified: true,
-    },
-    {
-      id: 3,
-      seller: "0x5A92...7E3F",
-      tokens: 850,
-      price: 2.5,
-      total: 2125,
-      change: 8.7,
-      trend: "up" as const,
-      sparkline: [2.3, 2.35, 2.4, 2.42, 2.48, 2.5],
-      co2Offset: 0.85,
-      round: 1,
-      certified: true,
-    },
-    {
-      id: 4,
-      seller: "0xB1C4...93A2",
-      tokens: 300,
-      price: 2.42,
-      total: 726,
-      change: 5.2,
-      trend: "up" as const,
-      sparkline: [2.3, 2.32, 2.36, 2.38, 2.4, 2.42],
-      co2Offset: 0.3,
-      round: 2,
-      certified: true,
-    },
-    {
-      id: 5,
-      seller: "0x3E7A...5B1C",
-      tokens: 2000,
-      price: 2.35,
-      total: 4700,
-      change: -1.8,
-      trend: "down" as const,
-      sparkline: [2.4, 2.38, 2.37, 2.36, 2.35, 2.35],
-      co2Offset: 2.0,
-      round: 1,
-      certified: true,
-    },
-    {
-      id: 6,
-      seller: "0x9D2F...8C4E",
-      tokens: 750,
-      price: 2.48,
-      total: 1860,
-      change: 6.3,
-      trend: "up" as const,
-      sparkline: [2.3, 2.34, 2.38, 2.42, 2.45, 2.48],
-      co2Offset: 0.75,
-      round: 2,
-      certified: true,
-    },
-    {
-      id: 7,
-      seller: "0x4C8B...2F9A",
-      tokens: 1500,
-      price: 2.4,
-      total: 3600,
-      change: 2.1,
-      trend: "up" as const,
-      sparkline: [2.35, 2.36, 2.37, 2.38, 2.39, 2.4],
-      co2Offset: 1.5,
-      round: 1,
-      certified: true,
-    },
-    {
-      id: 8,
-      seller: "0x7A1E...6D3B",
-      tokens: 425,
-      price: 2.44,
-      total: 1037,
-      change: 4.8,
-      trend: "up" as const,
-      sparkline: [2.3, 2.33, 2.37, 2.4, 2.42, 2.44],
-      co2Offset: 0.43,
-      round: 2,
-      certified: true,
-    },
-    {
-      id: 9,
-      seller: "0x6E9C...4A7D",
-      tokens: 980,
-      price: 2.39,
-      total: 2342,
-      change: -2.4,
-      trend: "down" as const,
-      sparkline: [2.45, 2.43, 2.42, 2.4, 2.39, 2.39],
-      co2Offset: 0.98,
-      round: 1,
-      certified: true,
-    },
-    {
-      id: 10,
-      seller: "0x2B5F...9E1C",
-      tokens: 650,
-      price: 2.46,
-      total: 1599,
-      change: 7.2,
-      trend: "up" as const,
-      sparkline: [2.28, 2.32, 2.37, 2.41, 2.44, 2.46],
-      co2Offset: 0.65,
-      round: 2,
-      certified: true,
-    },
-  ];
+  const fetchListingData = useCallback(async () => {
+    if (!accountId) return;
+
+    const [listingData] = await Promise.all([
+      supabase
+        .from("marketplace_listings")
+        .select("*")
+        .order("created_at", { ascending: false }),
+    ]);
+
+    if (listingData.data) setAllListings(listingData.data);
+    setIsLoading(false);
+  }, [accountId]);
+
+  useEffect(() => {
+    fetchListingData();
+  }, [fetchListingData]);
 
   const totalPages = Math.ceil(allListings.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -193,7 +104,7 @@ const Marketplace = () => {
     setDetailsDialogOpen(true);
   };
 
-  const handleConfirmBuy = () => {
+  const handleConfirmBuy = async () => {
     const amount = parseFloat(buyAmount);
     if (!amount || amount <= 0) {
       toast({
@@ -213,7 +124,16 @@ const Marketplace = () => {
       return;
     }
 
-    const totalCost = amount * selectedListing.price;
+    const tx = new ContractExecuteTransaction()
+      .setContractId(ContractId.fromString(import.meta.env.VITE_MARKETPLACE_ID))
+      .setPayableAmount(new Hbar(selectedListing.price))
+      .setFunction(
+        "buy",
+        new ContractFunctionParameters().addInt64(selectedListing.listingId)
+      )
+      .setGas(5_000_000);
+
+    await executeTransaction(accountId, tx);
 
     // Prepare certificate data
     const certData = {
@@ -231,7 +151,9 @@ const Marketplace = () => {
 
     toast({
       title: "Purchase successful!",
-      description: `Bought ${amount} tokens for ${totalCost.toFixed(2)} HBAR`,
+      description: `Bought ${amount} tokens for ${selectedListing.price.toFixed(
+        2
+      )} HBAR`,
     });
 
     setBuyDialogOpen(false);
@@ -656,7 +578,7 @@ const Marketplace = () => {
                   <div>
                     <p className="text-xs text-muted-foreground">Total Value</p>
                     <p className="text-lg font-bold">
-                      {selectedListing.total.toLocaleString()} HBAR
+                      {selectedListing.price.toLocaleString()} HBAR
                     </p>
                   </div>
                   <div>
