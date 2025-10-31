@@ -12,6 +12,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import {
+  ContractExecuteTransaction,
+  ContractFunctionParameters,
+  ContractId,
+} from "@hashgraph/sdk";
+import { executeTransaction } from "@/services/hashconnect";
+import useHashConnect from "@/hooks/useHashConnect";
 
 interface ApproveActionDialogProps {
   open: boolean;
@@ -26,6 +33,8 @@ export const ApproveActionDialog = ({
   action,
   onSuccess,
 }: ApproveActionDialogProps) => {
+  const { accountId } = useHashConnect();
+
   const [co2Impact, setCo2Impact] = useState(
     action?.co2_impact?.toString() || ""
   );
@@ -37,6 +46,20 @@ export const ApproveActionDialog = ({
   const handleApprove = async () => {
     setIsLoading(true);
     try {
+      const tx = new ContractExecuteTransaction()
+        .setContractId(
+          ContractId.fromString(import.meta.env.VITE_ACTION_REPOSITORY_ID)
+        )
+        .setFunction(
+          "approve",
+          new ContractFunctionParameters()
+            .addInt64(action.action_id)
+            .addUint64(tokensMinted)
+        )
+        .setGas(5_000_000);
+
+      await executeTransaction(accountId, tx);
+
       const { error } = await supabase
         .from("carbon_actions")
         .update({
@@ -62,6 +85,18 @@ export const ApproveActionDialog = ({
   const handleReject = async () => {
     setIsLoading(true);
     try {
+      const tx = new ContractExecuteTransaction()
+        .setContractId(
+          ContractId.fromString(import.meta.env.VITE_ACTION_REPOSITORY_ID)
+        )
+        .setFunction(
+          "reject",
+          new ContractFunctionParameters().addInt64(action.action_id)
+        )
+        .setGas(5_000_000);
+
+      await executeTransaction(accountId, tx);
+
       const { error } = await supabase
         .from("carbon_actions")
         .update({
