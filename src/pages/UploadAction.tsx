@@ -154,7 +154,7 @@ const UploadAction = () => {
       const actionId = Number(actionIdCall.getUint64(0));
 
       const topicTx = new TopicCreateTransaction()
-        .setTopicMemo(`${actionType}:Sustainable Action by ${accountId}`)
+        .setTopicMemo(`Sustainable Action by ${accountId}`)
         .setAutoRenewPeriod(2_592_000);
 
       const txResponse = await topicTx.execute(client);
