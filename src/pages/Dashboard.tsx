@@ -55,6 +55,7 @@ type CarbonAction = {
   created_at: string;
   tokens_minted: number;
   action_id: number;
+  topic_id: number;
 };
 
 type Profile = {
@@ -478,8 +479,12 @@ const Dashboard = () => {
                               .toUpperCase() +
                               action.verification_status.slice(1)}
                           </p>
-                          <a href="" className="text-accent underline">
-                            0.0.7163937
+                          <a
+                            href={`https://hashscan.io/testnet/topic/${action.topic_id}`}
+                            target="_blank"
+                            className="text-accent underline"
+                          >
+                            {action.topic_id}
                           </a>
                         </div>
                         {action.verification_status === "verified" && (
