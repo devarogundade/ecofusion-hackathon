@@ -1,4 +1,4 @@
-# ECOFUSION
+[ibrahim_arogundade_certificate.pdf](https://github.com/user-attachments/files/23269967/ibrahim_arogundade_certificate.pdf)# ECOFUSION
 
 # React App
 
@@ -75,9 +75,17 @@ HEDERA_PRIVATE_KEY=
 ```
 
 ```bash
-# 5. Start the development server
+# 5. Compile contracts
 npx hardat compile
+```
+
+```bash
+# 5. Start the development server
+npx hardhat run scripts/deploy.ts --network testnet
 ```
 
 ### Hedera Developer Certificates
 
+[certificate.pdf](https://github.com/user-attachments/files/23269974/certificate.pdf)
+
+[ibrahim_arogundade_certificate.pdf](https://github.com/user-attachments/files/23269972/ibrahim_arogundade_certificate.pdf)
