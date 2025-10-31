@@ -16,9 +16,11 @@ import {
   ContractExecuteTransaction,
   ContractFunctionParameters,
   ContractId,
+  TopicMessageSubmitTransaction,
 } from "@hashgraph/sdk";
 import { executeTransaction } from "@/services/hashconnect";
 import useHashConnect from "@/hooks/useHashConnect";
+import { testnetClient } from "@/services/hederaclient";
 
 interface ApproveActionDialogProps {
   open: boolean;
@@ -58,7 +60,21 @@ export const ApproveActionDialog = ({
         )
         .setGas(5_000_000);
 
-      await executeTransaction(accountId, tx);
+      const txReceipt = await executeTransaction(accountId, tx);
+
+      const client = testnetClient();
+      new TopicMessageSubmitTransaction()
+        .setTopicId(action.topic_id)
+        .setMessage(
+          JSON.stringify({
+            verification_status: "verified",
+            co2Impact,
+            tokensMinted,
+            serialNumbers: txReceipt.serials,
+          })
+        )
+        .freezeWith(client)
+        .execute(client);
 
       const { error } = await supabase
         .from("carbon_actions")
@@ -96,6 +112,17 @@ export const ApproveActionDialog = ({
         .setGas(5_000_000);
 
       await executeTransaction(accountId, tx);
+
+      const client = testnetClient();
+      new TopicMessageSubmitTransaction()
+        .setTopicId(action.topic_id)
+        .setMessage(
+          JSON.stringify({
+            verification_status: "rejected",
+          })
+        )
+        .freezeWith(client)
+        .execute(client);
 
       const { error } = await supabase
         .from("carbon_actions")
