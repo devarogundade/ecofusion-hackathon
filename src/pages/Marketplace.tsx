@@ -16,7 +16,6 @@ import {
 import {
   Pagination,
   PaginationContent,
-  PaginationEllipsis,
   PaginationItem,
   PaginationLink,
   PaginationNext,
@@ -48,13 +47,13 @@ interface Listing {
   created_at: string;
   expires_at: string;
   id: string;
+  listing_id: number;
   price_per_token: number;
+  seller_account_id: string;
   seller_id: string;
   status: string;
-  total_price: number;
-  listing_id: number;
   tokens: number;
-  seller_account_id: string;
+  total_price: number;
   updated_at: string;
 }
 
@@ -73,8 +72,6 @@ const Marketplace = () => {
   const itemsPerPage = 9;
 
   const fetchListingData = useCallback(async () => {
-    if (!accountId) return;
-
     const [listingData] = await Promise.all([
       supabase
         .from("marketplace_listings")
@@ -84,7 +81,7 @@ const Marketplace = () => {
 
     if (listingData.data) setAllListings(listingData.data);
     setIsLoading(false);
-  }, [accountId]);
+  }, []);
 
   useEffect(() => {
     fetchListingData();
@@ -93,7 +90,7 @@ const Marketplace = () => {
   const totalPages = Math.ceil(allListings.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const currentListings = allListings.slice(startIndex, endIndex);
+  const currentListings: Listing[] = allListings.slice(startIndex, endIndex);
 
   const handleBuy = (listing: any) => {
     setSelectedListing(listing);
@@ -244,14 +241,14 @@ const Marketplace = () => {
                       <div className="flex items-start justify-between">
                         <div className="flex-1 min-w-0">
                           <p className="font-mono text-sm font-semibold truncate">
-                            {listing.seller}
+                            {listing.seller_account_id}
                           </p>
                           <p className="text-xs text-muted-foreground mt-1">
                             {listing.tokens.toLocaleString()} tokens
                           </p>
                         </div>
                         <div className="p-2 rounded-lg bg-accent/10 flex-shrink-0">
-                          {listing.trend === "up" ? (
+                          {true ? (
                             <TrendingUp className="w-5 h-5 text-accent" />
                           ) : (
                             <TrendingDown className="w-5 h-5 text-destructive" />
@@ -263,7 +260,10 @@ const Marketplace = () => {
                       <div className="h-16 w-full">
                         <ResponsiveContainer width="100%" height="100%">
                           <LineChart
-                            data={listing.sparkline.map((value, i) => ({
+                            data={Array.from(
+                              { length: 8 },
+                              () => Math.floor(Math.random() * 100) + 1
+                            ).map((value, i) => ({
                               value,
                               index: i,
                             }))}
@@ -272,9 +272,7 @@ const Marketplace = () => {
                               type="monotone"
                               dataKey="value"
                               stroke={
-                                listing.trend === "up"
-                                  ? "hsl(95, 60%, 45%)"
-                                  : "hsl(0, 40%, 55%)"
+                                true ? "hsl(95, 60%, 45%)" : "hsl(0, 40%, 55%)"
                               }
                               strokeWidth={2}
                               dot={false}
@@ -287,15 +285,11 @@ const Marketplace = () => {
                       <div className="space-y-2">
                         <div className="flex items-baseline justify-between">
                           <span className="text-2xl font-bold">
-                            {listing.price} HBAR
+                            {listing.total_price} HBAR
                           </span>
-                          <Badge
-                            variant={
-                              listing.trend === "up" ? "default" : "destructive"
-                            }
-                          >
-                            {listing.change > 0 ? "+" : ""}
-                            {listing.change}%
+                          <Badge variant={true ? "default" : "destructive"}>
+                            {true ? "+" : ""}
+                            {2}%
                           </Badge>
                         </div>
                         <div className="flex justify-between text-sm">
@@ -303,7 +297,7 @@ const Marketplace = () => {
                             Total Value
                           </span>
                           <span className="font-semibold">
-                            {listing.total.toLocaleString()} HBAR
+                            {listing.total_price.toLocaleString()} HBAR
                           </span>
                         </div>
                         <div className="flex justify-between text-sm">
@@ -311,21 +305,16 @@ const Marketplace = () => {
                             CO₂ Offset
                           </span>
                           <span className="font-semibold">
-                            {listing.co2Offset} tons
+                            {listing.co2_offset} tons
                           </span>
                         </div>
                       </div>
 
                       {/* Badges */}
                       <div className="flex gap-2">
-                        <Badge variant="outline" className="text-xs">
-                          Round {listing.round}
+                        <Badge variant="default" className="text-xs">
+                          VERRA Certified
                         </Badge>
-                        {listing.certified && (
-                          <Badge variant="default" className="text-xs">
-                            VERRA Certified
-                          </Badge>
-                        )}
                       </div>
 
                       {/* Actions */}
