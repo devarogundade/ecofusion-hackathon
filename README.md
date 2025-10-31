@@ -86,6 +86,7 @@ npx hardhat run scripts/deploy.ts --network testnet
 
 ### Hedera Developer Certificates
 
-[certificate.pdf](https://github.com/user-attachments/files/23269974/certificate.pdf)
+[chisom certificate.pdf](https://github.com/user-attachments/files/23269974/certificate.pdf)
 
-[ibrahim_arogundade_certificate.pdf](https://github.com/user-attachments/files/23269972/ibrahim_arogundade_certificate.pdf)
+[ibrahim_certificate.pdf](https://github.com/user-attachments/files/23269972/ibrahim_arogundade_certificate.pdf)
+
