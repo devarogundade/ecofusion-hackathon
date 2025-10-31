@@ -4,7 +4,7 @@ Ecofusion provides an open and transparent way for individuals and organizations
 
 All verified actions are aggregated into larger community projects that meet certification standards set by recognized bodies like verra. Once a project is certified, ECOFUSION mints carbon tokens through the Hedera Token Service (HTS) to represent the total verified carbon credits. Participants receive fractional tokens based on their verified contributions, creating a fair and traceable reward system.
 
-<img width="1081" height="639" alt="ecofusion drawio" src="https://github.com/user-attachments/assets/e2d3efa3-d715-411a-a7fe-e647d865c4db" />
+<img width="1141" height="699" alt="Untitled Diagram drawio (2)" src="https://github.com/user-attachments/assets/830cf2de-4486-41d4-935c-2ce538294e50" />
 
 ## React App
 
@@ -97,6 +97,7 @@ npx hardhat run scripts/deploy.ts --network testnet
 [ibrahim_certificate.pdf](https://github.com/user-attachments/files/23269972/ibrahim_arogundade_certificate.pdf)
 
 [pitch deck](https://drive.google.com/file/d/1T9TyETQDXetKu1DeSdFqKjbgeLLwh0lv/view?usp=sharing)
+
 
 
 
