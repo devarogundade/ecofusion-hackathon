@@ -76,6 +76,7 @@ const Marketplace = () => {
       supabase
         .from("marketplace_listings")
         .select("*")
+        .eq("status", "listed")
         .order("created_at", { ascending: false }),
     ]);
 
@@ -122,7 +123,7 @@ const Marketplace = () => {
         buyerName: "Carbon Offset Buyer",
         tokensAmount: selectedListing.co2_offset,
         co2Offset: selectedListing.co2_offset,
-        transactionHash: txReceipt.scheduledTransactionId.toString(),
+        transactionHash: tx.transactionId?.toString(),
         certificateId: `ECF-${Date.now()}-${Math.floor(Math.random() * 10000)}`,
         purchaseDate: new Date().toLocaleDateString(),
       };
