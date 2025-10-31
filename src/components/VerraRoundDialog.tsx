@@ -58,29 +58,35 @@ export const VerraRoundDialog = ({
     setLoading(true);
 
     try {
-      const dataToSubmit = {
-        round_number: parseInt(formData.round_number),
-        target_amount: parseFloat(formData.target_amount),
-        achieved_amount: parseFloat(formData.achieved_amount.toString()),
-        status: formData.status,
-        start_date: formData.start_date || null,
-        end_date: formData.end_date || null,
-        is_certified: formData.is_certified,
-        topic_id: formData.topic_id || null,
-      };
-
-      if (round) {
+      if (round.id) {
         const { error } = await supabase
           .from("verra_rounds")
-          .update(dataToSubmit)
-          .eq("id", round.id);
+          .update({
+            target_amount: Number(formData.target_amount),
+            achieved_amount: Number(formData.achieved_amount.toString()),
+            status: formData.status,
+            start_date: formData.start_date || null,
+            end_date: formData.end_date || null,
+            is_certified: formData.is_certified,
+            topic_id: formData.topic_id || null,
+          })
+          .eq("round_number", round.round_number);
 
         if (error) throw error;
         toast.success("VERRA round updated successfully");
       } else {
-        const { error } = await supabase
-          .from("verra_rounds")
-          .insert([dataToSubmit]);
+        const { error } = await supabase.from("verra_rounds").insert([
+          {
+            round_number: Number(formData.round_number),
+            target_amount: Number(formData.target_amount),
+            achieved_amount: Number(formData.achieved_amount.toString()),
+            status: formData.status,
+            start_date: formData.start_date || null,
+            end_date: formData.end_date || null,
+            is_certified: formData.is_certified,
+            topic_id: formData.topic_id || null,
+          },
+        ]);
 
         if (error) throw error;
         toast.success("VERRA round created successfully");
@@ -112,6 +118,7 @@ export const VerraRoundDialog = ({
               id="round_number"
               type="number"
               required
+              disabled={Boolean(round?.round_number)}
               value={formData.round_number}
               onChange={(e) =>
                 setFormData({ ...formData, round_number: e.target.value })
