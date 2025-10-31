@@ -18,7 +18,6 @@ import {
   ContractId,
   TopicMessageSubmitTransaction,
 } from "@hashgraph/sdk";
-import { executeTransaction } from "@/services/hashconnect";
 import useHashConnect from "@/hooks/useHashConnect";
 import { testnetClient } from "@/services/hederaclient";
 import { ethers } from "ethers";
@@ -36,8 +35,6 @@ export const ApproveActionDialog = ({
   action,
   onSuccess,
 }: ApproveActionDialogProps) => {
-  const { accountId } = useHashConnect();
-
   const [co2Impact, setCo2Impact] = useState(
     action?.co2_impact?.toString() || ""
   );
@@ -57,14 +54,16 @@ export const ApproveActionDialog = ({
           "approve",
           new ContractFunctionParameters()
             .addInt64(action.action_id)
-            .addUint64(Number(ethers.parseUnits(tokensMinted, 8)))
+            .addInt64(Number(ethers.parseUnits(tokensMinted, 8)))
         )
         .setGas(5_000_000);
 
-      const txReceipt = await executeTransaction(accountId, tx);
-
       const client = testnetClient();
-      new TopicMessageSubmitTransaction()
+
+      const txResponse = await tx.execute(client);
+      const txReceipt = await txResponse.getReceipt(client);
+
+      const topicTx = new TopicMessageSubmitTransaction()
         .setTopicId(action.topic_id)
         .setMessage(
           JSON.stringify({
@@ -73,9 +72,9 @@ export const ApproveActionDialog = ({
             tokensMinted,
             serialNumbers: txReceipt.serials,
           })
-        )
-        .freezeWith(client)
-        .execute(client);
+        );
+
+      await topicTx.execute(client);
 
       const { error } = await supabase
         .from("carbon_actions")
@@ -83,6 +82,7 @@ export const ApproveActionDialog = ({
           verification_status: "verified",
           co2_impact: Number(co2Impact),
           tokens_minted: Number(tokensMinted),
+          serial_number: 0,
         })
         .eq("id", action.id);
 
@@ -112,23 +112,24 @@ export const ApproveActionDialog = ({
         )
         .setGas(5_000_000);
 
-      await executeTransaction(accountId, tx);
-
       const client = testnetClient();
-      new TopicMessageSubmitTransaction()
+      await tx.execute(client);
+
+      const topicTx = new TopicMessageSubmitTransaction()
         .setTopicId(action.topic_id)
         .setMessage(
           JSON.stringify({
             verification_status: "rejected",
           })
-        )
-        .freezeWith(client)
-        .execute(client);
+        );
+
+      await topicTx.execute(client);
 
       const { error } = await supabase
         .from("carbon_actions")
         .update({
           verification_status: "rejected",
+          serial_number: 0,
         })
         .eq("id", action.id);
 

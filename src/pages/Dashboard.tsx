@@ -42,6 +42,8 @@ import {
   TokenId,
   TokenNftAllowance,
   Long,
+  NftId,
+  TokenNftInfoQuery,
 } from "@hashgraph/sdk";
 import { testnetClient } from "@/services/hederaclient";
 import { executeTransaction } from "@/services/hashconnect";
@@ -55,6 +57,7 @@ type CarbonAction = {
   created_at: string;
   tokens_minted: number;
   action_id: number;
+  serial_number: number;
   topic_id: string;
 };
 
@@ -132,24 +135,12 @@ const Dashboard = () => {
     try {
       setIsClaiming(true);
 
-      const approvetx = new AccountAllowanceApproveTransaction({
-        nftApprovals: [
-          new TokenNftAllowance({
-            tokenId: TokenId.fromString(
-              import.meta.env.VITE_CARBON_CREDIT_TOKEN_ID
-            ),
-            spenderAccountId: AccountId.fromString(
-              import.meta.env.VITE_CARBON_CREDIT_ID
-            ),
-            delegatingSpender: AccountId.fromString(
-              import.meta.env.VITE_CARBON_CREDIT_ID
-            ),
-            serialNumbers: [Long.fromNumber(serialNumber)],
-            ownerAccountId: AccountId.fromString(accountId),
-            allSerials: true,
-          }),
-        ],
-      });
+      const approvetx =
+        new AccountAllowanceApproveTransaction().approveTokenNftAllowance(
+          new NftId(import.meta.env.VITE_CARBON_CREDIT_TOKEN_ID, serialNumber),
+          AccountId.fromString(accountId),
+          ContractId.fromString(import.meta.env.VITE_CARBON_CREDIT_ID)
+        );
 
       await executeTransaction(accountId, approvetx);
 
@@ -485,7 +476,9 @@ const Dashboard = () => {
                         {action.verification_status === "verified" && (
                           <Button
                             disabled={isClaiming}
-                            onClick={() => handleRedeemAction(action.action_id)}
+                            onClick={() =>
+                              handleRedeemAction(action.serial_number)
+                            }
                           >
                             Claim
                           </Button>

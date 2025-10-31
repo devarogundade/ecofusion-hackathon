@@ -173,7 +173,6 @@ const UploadAction = () => {
             accountId,
           })
         )
-        .freezeWith(client)
         .execute(client);
 
       await supabase.from("carbon_actions").insert({
@@ -188,6 +187,7 @@ const UploadAction = () => {
         action_date: actionDate,
         proof_url: metadataUrl,
         action_id: actionId,
+        serial_number: 0,
       });
 
       toast.success(
