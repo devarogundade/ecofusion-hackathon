@@ -44,8 +44,7 @@ const SellTokenDialog = ({
 
   const handleSell = async () => {
     try {
-      const tokenAmount = parseFloat(tokens);
-      if (!tokenAmount || tokenAmount <= 0) {
+      if (!Number(tokens) || Number(tokens) <= 0) {
         toast({
           title: "Invalid amount",
           description: "Please enter a valid token amount",
@@ -54,7 +53,7 @@ const SellTokenDialog = ({
         return;
       }
 
-      if (tokenAmount > availableTokens) {
+      if (Number(tokens) > availableTokens) {
         toast({
           title: "Insufficient tokens",
           description: `You only have ${availableTokens} tokens available`,
@@ -63,20 +62,18 @@ const SellTokenDialog = ({
         return;
       }
 
-      const totalPrice = Number(tokenAmount * parseFloat(pricePerToken))
+      const totalPrice = (Number(tokens) * Number(pricePerToken))
         .toFixed(4)
         .toString();
       const expiresAt = new Date(expiresDate);
       const expiresIn = Math.ceil(expiresAt.getTime() / 1000);
-
-      console.log({ expiresIn });
 
       const approvetx =
         new AccountAllowanceApproveTransaction().approveTokenAllowance(
           TokenId.fromString(`${import.meta.env.VITE_CARBON_CREDIT_TOKEN_ID}`),
           AccountId.fromString(accountId),
           ContractId.fromString(import.meta.env.VITE_MARKETPLACE_ID),
-          Number(ethers.parseUnits(totalPrice.toString(), 8))
+          Number(ethers.parseUnits(tokens, 8))
         );
 
       await executeTransaction(accountId, approvetx);
@@ -89,7 +86,7 @@ const SellTokenDialog = ({
           "list",
           new ContractFunctionParameters()
             .addInt64(Number(ethers.parseUnits(tokens, 8)))
-            .addInt64(Number(ethers.parseUnits(totalPrice.toString(), 8)))
+            .addInt64(Number(ethers.parseUnits(totalPrice, 8)))
             .addInt64(expiresIn)
         )
         .setGas(5_000_000);
@@ -107,7 +104,7 @@ const SellTokenDialog = ({
 
       toast({
         title: "Listing created!",
-        description: `${tokenAmount} tokens listed for ${totalPrice} HBAR`,
+        description: `${tokens} tokens listed for ${totalPrice} HBAR`,
       });
 
       setOpen(false);
