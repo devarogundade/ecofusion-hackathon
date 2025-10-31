@@ -137,7 +137,9 @@ const Dashboard = () => {
 
       const approvetx =
         new AccountAllowanceApproveTransaction().approveTokenNftAllowance(
-          new NftId(import.meta.env.VITE_CARBON_CREDIT_TOKEN_ID, serialNumber),
+          NftId.fromString(
+            `${import.meta.env.VITE_ACTION_REPOSITORY_TOKEN_ID}/${serialNumber}`
+          ),
           AccountId.fromString(accountId),
           ContractId.fromString(import.meta.env.VITE_CARBON_CREDIT_ID)
         );
