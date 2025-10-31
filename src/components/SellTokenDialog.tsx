@@ -25,6 +25,7 @@ import { ethers } from "ethers";
 import { executeTransaction } from "@/services/hashconnect";
 import useHashConnect from "@/hooks/useHashConnect";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 interface SellTokenDialogProps {
   availableTokens: number;
@@ -41,6 +42,7 @@ const SellTokenDialog = ({
   const [expiresDate, setExpiresDate] = useState("");
   const { toast } = useToast();
   const { accountId } = useHashConnect();
+  const { user } = useAuth();
 
   const handleSell = async () => {
     try {
@@ -94,7 +96,7 @@ const SellTokenDialog = ({
       await executeTransaction(accountId, tx);
 
       await supabase.from("marketplace_listings").insert({
-        seller_id: accountId,
+        seller_id: user.id,
         expires_at: expiresAt.toISOString(),
         status: "listed",
         co2_offset: Number(tokens),
