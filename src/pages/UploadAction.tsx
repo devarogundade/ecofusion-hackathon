@@ -155,8 +155,6 @@ const UploadAction = () => {
 
       const topicTx = new TopicCreateTransaction()
         .setTopicMemo(`${actionType}:Action Upload`)
-        .setAdminKey(import.meta.env.VITE_OPERATOR_ID)
-        .setSubmitKey(import.meta.env.VITE_OPERATOR_KEY)
         .setAutoRenewPeriod(2_592_000);
 
       const txResponse = await topicTx.execute(client);
