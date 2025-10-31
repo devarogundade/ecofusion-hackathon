@@ -1,5 +1,9 @@
 # ECOFUSION
 
+Ecofusion provides an open and transparent way for individuals and organizations to transform their everyday sustainable actions into verified carbon value. Users can record activities such as tree planting, recycling, or renewable energy use directly on the platform. An AI verification system analyzes submitted evidence, like photos, videos, or metadata to estimate the CO₂ reduction and confirm authenticity.
+
+All verified actions are aggregated into larger community projects that meet certification standards set by recognized bodies like verra. Once a project is certified, ECOFUSION mints carbon tokens through the Hedera Token Service (HTS) to represent the total verified carbon credits. Participants receive fractional tokens based on their verified contributions, creating a fair and traceable reward system.
+
 ## React App
 
 ## ⚙️ Installation
@@ -89,5 +93,6 @@ npx hardhat run scripts/deploy.ts --network testnet
 [chisom certificate.pdf](https://github.com/user-attachments/files/23269974/certificate.pdf)
 
 [ibrahim_certificate.pdf](https://github.com/user-attachments/files/23269972/ibrahim_arogundade_certificate.pdf)
+
 
 
