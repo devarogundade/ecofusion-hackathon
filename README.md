@@ -86,7 +86,7 @@ npx hardat compile
 ```
 
 ```bash
-# 5. Start the development server
+# 6. Start the development server
 npx hardhat run scripts/deploy.ts --network testnet
 ```
 
@@ -105,6 +105,7 @@ npx hardhat run scripts/deploy.ts --network testnet
 - **Carbon Credit:** [https://hashscan.io/testnet/contract/0.0.7170364](https://hashscan.io/testnet/contract/0.0.7170364)  
 - **Carbon Credit Token (HTS):** [https://hashscan.io/testnet/token/0.0.7170366](https://hashscan.io/testnet/token/0.0.7170366)  
 - **Marketplace:** [https://hashscan.io/testnet/contract/0.0.7170368](https://hashscan.io/testnet/contract/0.0.7170368)
+
 
 
 
