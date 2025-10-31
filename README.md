@@ -94,5 +94,8 @@ npx hardhat run scripts/deploy.ts --network testnet
 
 [ibrahim_certificate.pdf](https://github.com/user-attachments/files/23269972/ibrahim_arogundade_certificate.pdf)
 
+[pitch deck](https://drive.google.com/file/d/1T9TyETQDXetKu1DeSdFqKjbgeLLwh0lv/view?usp=sharing)
+
+
 
 
