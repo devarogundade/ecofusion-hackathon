@@ -1,9 +1,18 @@
 # ECOFUSION
 
-Ecofusion provides an open and transparent way for individuals and organizations to transform their everyday sustainable actions into verified carbon value. Users can record activities such as tree planting, recycling, or renewable energy use directly on the platform. An AI verification system analyzes submitted evidence, like photos, videos, or metadata to estimate the CO₂ reduction and confirm authenticity.
+Ecofusion provides an open and transparent way for individuals and organizations to transform their everyday sustainable actions into verified carbon value.
 
-All verified actions are aggregated into larger community projects that meet certification standards set by recognized bodies like verra. Once a project is certified, ECOFUSION mints carbon tokens through the Hedera Token Service (HTS) to represent the total verified carbon credits. Participants receive fractional tokens based on their verified contributions, creating a fair and traceable reward system.
+Users can record activities such as tree planting, recycling, or renewable energy use directly on the platform. An AI verification system analyzes submitted evidence (photos, videos, metadata) to estimate CO₂ reduction and confirm authenticity.
 
+Ecofusion uses Distributed Ledger Technology (DLT) to store all verified sustainability actions on a decentralized, tamper-proof ledger. This ensures full transparency, prevents duplicate claims, and creates trusted traceability from individual actions to certified carbon credits.
+
+All verified actions are aggregated into larger community projects that meet certification standards set by recognized bodies like Verra. Once a project is certified, Ecofusion mints carbon tokens through the Hedera Token Service (HTS) to represent the total verified carbon credits.
+
+This entire tokenization cycle is anchored on DLT, which provides decentralized validation, immutable audit trails, and guarantees that every carbon token minted corresponds to a real, verifiable carbon credit. Participants receive fractional tokens based on their contributions, creating a fair and transparent reward system.
+
+Each token is fully backed by a certified carbon credit, ensuring accountability and trust. By combining AI verification, DLT transparency, and community participation, Ecofusion makes it simple for anyone to contribute to global climate goals while gaining measurable environmental and financial value.
+
+Ecofusion ensures that Africans can monetize verified climate actions or participate in global carbon markets, unlocking value that was previously out of reach.
 <img width="1141" height="699" alt="Untitled Diagram drawio (2)" src="https://github.com/user-attachments/assets/830cf2de-4486-41d4-935c-2ce538294e50" />
 
 ## React App
@@ -105,6 +114,7 @@ npx hardhat run scripts/deploy.ts --network testnet
 - **Carbon Credit:** [https://hashscan.io/testnet/contract/0.0.7170364](https://hashscan.io/testnet/contract/0.0.7170364)  
 - **Carbon Credit Token (HTS):** [https://hashscan.io/testnet/token/0.0.7170366](https://hashscan.io/testnet/token/0.0.7170366)  
 - **Marketplace:** [https://hashscan.io/testnet/contract/0.0.7170368](https://hashscan.io/testnet/contract/0.0.7170368)
+
 
 
 
