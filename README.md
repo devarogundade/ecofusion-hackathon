@@ -13,6 +13,7 @@ This entire tokenization cycle is anchored on DLT, which provides decentralized 
 Each token is fully backed by a certified carbon credit, ensuring accountability and trust. By combining AI verification, DLT transparency, and community participation, Ecofusion makes it simple for anyone to contribute to global climate goals while gaining measurable environmental and financial value.
 
 Ecofusion ensures that Africans can monetize verified climate actions or participate in global carbon markets, unlocking value that was previously out of reach.
+
 <img width="1141" height="699" alt="Untitled Diagram drawio (2)" src="https://github.com/user-attachments/assets/830cf2de-4486-41d4-935c-2ce538294e50" />
 
 ## React App
@@ -114,6 +115,7 @@ npx hardhat run scripts/deploy.ts --network testnet
 - **Carbon Credit:** [https://hashscan.io/testnet/contract/0.0.7170364](https://hashscan.io/testnet/contract/0.0.7170364)  
 - **Carbon Credit Token (HTS):** [https://hashscan.io/testnet/token/0.0.7170366](https://hashscan.io/testnet/token/0.0.7170366)  
 - **Marketplace:** [https://hashscan.io/testnet/contract/0.0.7170368](https://hashscan.io/testnet/contract/0.0.7170368)
+
 
 
 
