@@ -106,7 +106,7 @@ npx hardhat run scripts/deploy.ts --network testnet
 
 [ibrahim_certificate.pdf](https://github.com/user-attachments/files/23269972/ibrahim_arogundade_certificate.pdf)
 
-[pitch deck](https://drive.google.com/file/d/1T9TyETQDXetKu1DeSdFqKjbgeLLwh0lv/view?usp=sharing](https://www.canva.com/design/DAG3HI92HfE/b_nWwYGcL6OlSAn5y93X_A/edit)
+[pitch deck](https://www.canva.com/design/DAG3HI92HfE/b_nWwYGcL6OlSAn5y93X_A/edit)
 
 # Deployment Links
 
@@ -115,6 +115,7 @@ npx hardhat run scripts/deploy.ts --network testnet
 - **Carbon Credit:** [https://hashscan.io/testnet/contract/0.0.7170364](https://hashscan.io/testnet/contract/0.0.7170364)  
 - **Carbon Credit Token (HTS):** [https://hashscan.io/testnet/token/0.0.7170366](https://hashscan.io/testnet/token/0.0.7170366)  
 - **Marketplace:** [https://hashscan.io/testnet/contract/0.0.7170368](https://hashscan.io/testnet/contract/0.0.7170368)
+
 
 
 
