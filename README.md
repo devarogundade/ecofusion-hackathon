@@ -14,6 +14,26 @@ Each token is fully backed by a certified carbon credit, ensuring accountability
 
 Ecofusion ensures that Africans can monetize verified climate actions or participate in global carbon markets, unlocking value that was previously out of reach.
 
+##Multi-Layer Verification Strategy
+
+ AI-Powered Evidence Analysis (First Line of Defense)
+   
+A. Metadata Verification
+GPS match: Confirms the photo was taken at the claimed location.
+Timestamp check: Ensures the image is recent and not reused.
+Device fingerprinting: Flags unusual submission patterns from the same device.
+Reverse image search: Detects stolen or internet-sourced images.
+B. Visual Content Analysis
+Object recognition: Confirms trees, solar panels, or recycling actions are present.
+Context validation: Compares surroundings with satellite/location data.
+Size & scale checks: Estimates tree height, solar panel size, or waste volume.
+Health indicators: For trees—analyzes leaf color, soil condition, and signs of actual planting.
+C. Pattern Detection
+Flags repeated or identical images.
+Detects unrealistic activity spikes (e.g., many submissions in a day).
+Identifies manipulation or AI-generated imagery.
+
+
 <img width="1141" height="699" alt="Untitled Diagram drawio (2)" src="https://github.com/user-attachments/assets/830cf2de-4486-41d4-935c-2ce538294e50" />
 
 ## React App
@@ -115,6 +135,7 @@ npx hardhat run scripts/deploy.ts --network testnet
 - **Carbon Credit:** [https://hashscan.io/testnet/contract/0.0.7170364](https://hashscan.io/testnet/contract/0.0.7170364)  
 - **Carbon Credit Token (HTS):** [https://hashscan.io/testnet/token/0.0.7170366](https://hashscan.io/testnet/token/0.0.7170366)  
 - **Marketplace:** [https://hashscan.io/testnet/contract/0.0.7170368](https://hashscan.io/testnet/contract/0.0.7170368)
+
 
 
 
